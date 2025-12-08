@@ -424,3 +424,5 @@ yarn-error.log*
 
 # Hệ điều hành Mac (nếu bạn hoặc team dùng Mac)
 .DS_Store
+
+appsettings.Production.json
