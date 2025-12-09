@@ -68,7 +68,7 @@
 
       <div class="mt-8 pt-8 border-t border-gray-200">
         <p class="text-gray-500 text-sm text-center">
-          © {{ currentYear }} QuizHub
+          © {{ currentYear }} QuizHub - Đồ án học tập
         </p>
       </div>
     </div>

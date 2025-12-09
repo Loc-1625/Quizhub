@@ -181,19 +181,19 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
-            <div class="text-3xl md:text-4xl font-bold text-primary-600">500+</div>
+            <div class="text-3xl md:text-4xl font-bold text-primary-600">0</div>
             <div class="text-gray-600 mt-1">Người dùng</div>
           </div>
           <div>
-            <div class="text-3xl md:text-4xl font-bold text-primary-600">1000+</div>
+            <div class="text-3xl md:text-4xl font-bold text-primary-600">0</div>
             <div class="text-gray-600 mt-1">Bài thi</div>
           </div>
           <div>
-            <div class="text-3xl md:text-4xl font-bold text-primary-600">50K+</div>
+            <div class="text-3xl md:text-4xl font-bold text-primary-600">0</div>
             <div class="text-gray-600 mt-1">Câu hỏi</div>
           </div>
           <div>
-            <div class="text-3xl md:text-4xl font-bold text-primary-600">100K+</div>
+            <div class="text-3xl md:text-4xl font-bold text-primary-600">0</div>
             <div class="text-gray-600 mt-1">Lượt làm bài</div>
           </div>
         </div>
