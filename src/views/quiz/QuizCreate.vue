@@ -39,10 +39,10 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                Danh mục
+                Danh mục <span class="text-red-500">*</span>
               </label>
               <select v-model="form.maDanhMuc" class="input-field">
-                <option value="">-- Chọn danh mục --</option>
+                <option value="" disabled>-- Chọn danh mục --</option>
                 <option v-for="cat in categories" :key="cat.maDanhMuc" :value="cat.maDanhMuc">
                   {{ cat.tenDanhMuc }}
                 </option>
@@ -262,7 +262,7 @@
         </router-link>
         <button
           type="submit"
-          :disabled="submitting || form.cacCauHoi.length === 0"
+          :disabled="submitting || form.cacCauHoi.length === 0 || !form.maDanhMuc"
           class="btn-primary"
         >
           <ArrowPathIcon v-if="submitting" class="w-5 h-5 mr-2 animate-spin" />
@@ -503,9 +503,9 @@
                     </div>
                     
                     <div class="flex items-center gap-2 flex-1">
-                      <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Danh mục chung</label>
+                      <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Danh mục chung <span class="text-red-500">*</span></label>
                       <select v-model="batchCommonCategory" class="input-field-sm flex-1" @change="applyCommonCategory">
-                        <option value="">Không có danh mục</option>
+                        <option value="" disabled>Không có danh mục</option>
                         <option v-for="cat in categories" :key="cat.maDanhMuc" :value="cat.maDanhMuc">
                           {{ cat.tenDanhMuc }}
                         </option>
@@ -705,7 +705,7 @@
                     <button
                       type="button"
                       @click="createBatchQuestions"
-                      :disabled="creatingQuestion || completedBatchQuestions < batchQuestionCount"
+                      :disabled="creatingQuestion || !batchCommonCategory || completedBatchQuestions < batchQuestionCount"
                       class="btn-primary"
                     >
                       <ArrowPathIcon v-if="creatingQuestion" class="w-5 h-5 mr-2 animate-spin" />

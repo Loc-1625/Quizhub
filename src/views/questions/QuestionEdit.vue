@@ -17,10 +17,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-base font-medium text-gray-700 mb-2">
-              Danh mục
+              Danh mục <span class="text-red-500">*</span>
             </label>
             <select v-model="form.maDanhMuc" class="input-field py-2.5 text-base">
-              <option value="">Không có danh mục</option>
+              <option value="" disabled>Không có danh mục</option>
               <option v-for="cat in categories" :key="cat.maDanhMuc" :value="cat.maDanhMuc">
                 {{ cat.tenDanhMuc }}
               </option>
@@ -134,7 +134,7 @@
         </router-link>
         <button
           type="submit"
-          :disabled="submitting || !isFormValid"
+          :disabled="submitting || !isFormValid || !form.maDanhMuc"
           class="btn-primary text-base px-5 py-2.5"
         >
           <ArrowPathIcon v-if="submitting" class="w-5 h-5 mr-2 animate-spin" />
