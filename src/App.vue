@@ -24,6 +24,8 @@
     <!-- Footer -->
     <Footer v-if="!isQuizTaking && !isAuthPage" />
   </div>
+
+  <SpeedInsights />
 </template>
 
 <script setup>
@@ -31,6 +33,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
+import { SpeedInsights } from "@vercel/speed-insights/vue"
 
 const route = useRoute()
 
