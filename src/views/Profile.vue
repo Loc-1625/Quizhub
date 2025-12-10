@@ -164,7 +164,7 @@ const changingPassword = ref(false)
 const getAvatarUrl = (avatar) => {
   if (!avatar) return null
   // If already full URL (starts with http), return as is
-  if (avatar.startsWith('http')) return avatar
+  if (avatar.startsWith('http') || avatar.startsWith('https')) return avatar
   // Otherwise, prepend the API base URL (without /api)
   return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${avatar}`
 }

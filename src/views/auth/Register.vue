@@ -156,9 +156,9 @@
 
         <!-- Social Login -->
         <div class="w-full">
-          <GoogleLogin :callback="handleGoogleCallback">
             <button
               type="button" 
+              @click="loginWithGoogle"
               class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
             >
               <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -169,7 +169,6 @@
               </svg>
               Tiếp tục với Google
             </button>
-          </GoogleLogin>
         </div>
       </div>
     </div>
@@ -177,6 +176,8 @@
 </template>
 
 <script setup>
+import axios from 'axios' 
+import { googleTokenLogin } from 'vue3-google-login'
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -275,35 +276,38 @@ const handleRegister = async () => {
   }
 }
 
-const handleGoogleCallback = async (response) => {
-  console.log("Google Token:", response.credential)
-  
+const loginWithGoogle = async () => {
   try {
-    loading.value = true // Tận dụng biến loading có sẵn để hiện hiệu ứng xoay (nếu có)
+    const response = await googleTokenLogin()
+
+    // LẤY ACCESS_TOKEN (Cái mà hình ảnh của bạn cho thấy là có)
+    const token = response.access_token
+
+    if (!token) {
+      alert("Lỗi: Không lấy được Token")
+      return
+    }
+
+    loading.value = true
     
-    // Gọi API mới ở Backend
-    const backendUrl = import.meta.env.DEV ? 'https://localhost:7001' : (import.meta.env.VITE_BACKEND_URL || '')
+    // Gửi xuống Backend
+    const backendUrl = import.meta.env.DEV ? 'http://localhost:5099' : (import.meta.env.VITE_BACKEND_URL || '')
     
+    // SỬA TÊN BIẾN GỬI ĐI: 'AccessToken' (Khớp với DTO Backend mới sửa ở Bước 1)
     const res = await axios.post(`${backendUrl}/api/Auth/google-login`, {
-      credential: response.credential
-    });
+      AccessToken: token 
+    })
 
     if (res.data.success) {
-      // Gọi action loginSuccess hoặc lưu thủ công vào store
-      // Giả sử authStore có hàm setAuthData, hoặc bạn gọi authStore.login() kiểu khác
-      // Ở đây ta set thủ công để demo, tốt nhất là update authStore của bạn để có hàm handleLoginSuccess(res.data)
-      
+      // ... Logic lưu token và redirect giữ nguyên ...
       authStore.token = res.data.token
       authStore.user = res.data.user
-      authStore.isAuthenticated = true
-      
-      // Lưu vào localStorage nếu cần persist
-      
-      router.push('/explore') // Hoặc /dashboard
+      // ...
+      router.push('/explore')
     } 
   } catch (error) {
     console.error(error)
-    alert("Đăng nhập Google thất bại: " + (error.response?.data?.message || error.message))
+    alert("Đăng nhập thất bại: " + (error.response?.data?.message || error.message))
   } finally {
     loading.value = false
   }
