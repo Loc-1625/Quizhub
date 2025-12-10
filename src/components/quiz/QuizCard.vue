@@ -79,7 +79,10 @@
       <!-- Author -->
       <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
         <div class="flex items-center">
-          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+          <div v-if="quiz?.anhDaiDienNguoiTao" class="w-6 h-6 rounded-full from-primary-500 to-secondary-500 flex items-center justify-center">
+            <img :src="getAvatarUrl(quiz.anhDaiDienNguoiTao)" alt="Avatar" class="w-6 h-6 rounded-full object-cover" />
+          </div>
+          <div v-else class="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
             <span class="text-white text-xs font-medium">
               {{ getInitials(quiz.tenNguoiTao) }}
             </span>
@@ -123,5 +126,13 @@ const formatDate = (dateStr) => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return null
+  // If already full URL (starts with http), return as is
+  if (avatar.startsWith('http') || avatar.startsWith('https')) return avatar
+  // Otherwise, prepend the API base URL (without /api)
+  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${avatar}`
 }
 </script>

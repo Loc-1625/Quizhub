@@ -131,7 +131,10 @@
         
         <div class="space-y-4">
           <div v-for="user in recentUsers" :key="user.id" class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium">
+            <div v-if="user?.anhDaiDien" class="w-10 h-10 rounded-full from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium">
+              <img :src="getAvatarUrl(user.anhDaiDien)" alt="Avatar" class="w-10 h-10 rounded-full object-cover" />
+            </div>
+            <div v-else class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium">
               {{ user.hoTen?.charAt(0) || 'U' }}
             </div>
             <div class="flex-1 min-w-0">
@@ -388,4 +391,12 @@ const loadDashboardData = async () => {
 onMounted(() => {
   loadDashboardData()
 })
+
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return null
+  // If already full URL (starts with http), return as is
+  if (avatar.startsWith('http') || avatar.startsWith('https')) return avatar
+  // Otherwise, prepend the API base URL (without /api)
+  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${avatar}`
+}
 </script>

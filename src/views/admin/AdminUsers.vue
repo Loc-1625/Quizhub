@@ -68,9 +68,12 @@
             <tr v-for="user in users" :key="user.maNguoiDung" class="hover:bg-gray-50">
               <td class="px-6 py-4">
                 <div class="flex items-center">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium shrink-0">
-                    {{ user.hoTen?.charAt(0) || 'U' }}
-                  </div>
+                  <div v-if="user?.anhDaiDien" class="w-10 h-10 rounded-full from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium">
+              <img :src="getAvatarUrl(user.anhDaiDien)" alt="Avatar" class="w-10 h-10 rounded-full object-cover" />
+            </div>
+            <div v-else class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium">
+              {{ user.hoTen?.charAt(0) || 'U' }}
+            </div>
                   <div class="ml-4">
                     <div class="font-medium text-gray-900">{{ user.hoTen }}</div>
                     <div class="text-sm text-gray-500">{{ user.email }}</div>
@@ -435,4 +438,12 @@ const deleteUser = async () => {
 onMounted(() => {
   loadUsers()
 })
+
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return null
+  // If already full URL (starts with http), return as is
+  if (avatar.startsWith('http') || avatar.startsWith('https')) return avatar
+  // Otherwise, prepend the API base URL (without /api)
+  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${avatar}`
+}
 </script>

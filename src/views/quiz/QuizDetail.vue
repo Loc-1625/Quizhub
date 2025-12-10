@@ -89,7 +89,10 @@
 
           <!-- Author -->
           <div class="flex items-center mt-4 pt-4 border-t border-gray-100">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+            <div v-if="quiz?.anhDaiDienNguoiTao" class="w-10 h-10 rounded-full from-primary-500 to-secondary-500 flex items-center justify-center">
+              <img :src="getAvatarUrl(quiz.anhDaiDienNguoiTao)" alt="Avatar" class="w-10 h-10 rounded-full object-cover" />
+            </div>
+            <div v-else class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
               <span class="text-white font-medium">{{ getInitials(quiz.tenNguoiTao) }}</span>
             </div>
             <div class="ml-3">
@@ -591,4 +594,12 @@ const confirmDeleteReview = async (reviewId) => {
 onMounted(() => {
   loadQuiz()
 })
+
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return null
+  // If already full URL (starts with http), return as is
+  if (avatar.startsWith('http') || avatar.startsWith('https')) return avatar
+  // Otherwise, prepend the API base URL (without /api)
+  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${avatar}`
+}
 </script>
