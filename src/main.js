@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import vue3GoogleLogin from 'vue3-google-login'
 
 import App from './App.vue'
 import router from './router'
@@ -27,6 +28,11 @@ app.use(Toast, {
   closeButton: 'button',
   icon: true,
   rtl: false
+})
+
+app.use(vue3GoogleLogin, {
+  // Lấy ClientId từ biến môi trường
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID 
 })
 
 // Initialize auth store after pinia is ready, BEFORE router
