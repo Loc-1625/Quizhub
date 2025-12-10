@@ -127,12 +127,17 @@
             class="w-full h-full object-cover"
           />
           <div class="absolute top-2 right-2 flex gap-2 z-10">
-            <span :class="[
-              'badge',
-              quiz.cheDoCongKhai === 'CongKhai' ? 'badge-success' : 'badge-warning'
-            ]">
-              {{ quiz.cheDoCongKhai === 'CongKhai' ? 'Công khai' : 'Riêng tư' }}
-            </span>
+            <span v-if="quiz.cheDoCongKhai === 'CongKhai'" class="badge badge-success">
+    Công khai
+  </span>
+
+  <span v-else-if="quiz.cheDoCongKhai === 'RiengTu'" class="badge bg-gray-100 text-gray-700">
+    Riêng tư
+  </span>
+
+  <span v-else class="badge bg-yellow-100 text-yellow-700">
+    Có mật khẩu
+  </span>
           </div>
         </div>
 
