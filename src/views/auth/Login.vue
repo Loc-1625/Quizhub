@@ -131,6 +131,8 @@ import {
   ArrowPathIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
+import axios from 'axios' 
+import { googleTokenLogin } from 'vue3-google-login'
 
 const router = useRouter()
 const route = useRoute()
