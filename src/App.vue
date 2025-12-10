@@ -3,9 +3,7 @@
   <div v-if="isMaintenanceMode" class="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 z-50">
     <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center transform transition-all hover:scale-105 duration-300">
       <h1 class="text-3xl font-bold text-gray-800 mb-3">Hệ thống đang bảo trì</h1>
-      <p class="text-gray-600 mb-6 leading-relaxed">
         Vui lòng quay lại sau
-      </p>
     </div>
   </div>
 
