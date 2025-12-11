@@ -70,9 +70,9 @@
           <UserGroupIcon class="w-4 h-4 mr-1" />
           {{ quiz.tongLuotLamBai || 0 }} lượt
         </div>
-        <div v-if="quiz.diemTrungBinh" class="flex items-center">
+        <div v-if="quiz.xepHangTrungBinh" class="flex items-center">
           <StarIcon class="w-4 h-4 mr-1 text-yellow-400 fill-yellow-400" />
-          {{ quiz.diemTrungBinh.toFixed(1) }}
+          {{ quiz.xepHangTrungBinh.toFixed(1) }}
         </div>
       </div>
 

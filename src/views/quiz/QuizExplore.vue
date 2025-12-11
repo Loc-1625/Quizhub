@@ -30,7 +30,7 @@
         <select v-model="filter.sortBy" class="input-field md:w-48" @change="loadQuizzes">
           <option value="NgayTao">Mới nhất</option>
           <option value="TongLuotLamBai">Phổ biến nhất</option>
-          <option value="DiemTrungBinh">Đánh giá cao</option>
+          <option value="XepHangTrungBinh">Đánh giá cao</option>
         </select>
       </div>
     </div>

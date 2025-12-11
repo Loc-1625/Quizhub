@@ -75,14 +75,14 @@
               <UserGroupIcon class="w-5 h-5 mr-1" />
               {{ quiz.tongLuotLamBai || 0 }} lượt làm
             </div>
-            <div v-if="reviewStats.diemTrungBinh > 0" class="flex items-center">
+            <div v-if="reviewStats.xepHangTrungBinh > 0" class="flex items-center">
               <div class="flex mr-1">
                 <StarIcon v-for="s in 5" :key="s" :class="[
                   'w-5 h-5',
-                  s <= Math.round(reviewStats.diemTrungBinh) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+                  s <= Math.round(reviewStats.xepHangTrungBinh) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
                 ]" />
               </div>
-              <span class="font-medium">{{ reviewStats.diemTrungBinh.toFixed(1) }}</span>
+              <span class="font-medium">{{ reviewStats.xepHangTrungBinh.toFixed(1) }}</span>
               <span class="text-gray-400 ml-1">({{ reviewStats.tongDanhGia }} đánh giá)</span>
             </div>
           </div>
@@ -365,7 +365,7 @@ const guestName = ref('')
 const showReviewForm = ref(false)
 const reviews = ref([])
 const reviewStats = reactive({
-  diemTrungBinh: 0,
+  xepHangTrungBinh: 0,
   tongDanhGia: 0
 })
 const reviewPagination = reactive({
@@ -454,7 +454,7 @@ const loadReviewStats = async () => {
   try {
     const response = await reviewService.getStatistics(quiz.value.maBaiThi)
     if (response.success && response.data) {
-      reviewStats.diemTrungBinh = response.data.diemTrungBinh || 0
+      reviewStats.xepHangTrungBinh = response.data.xepHangTrungBinh || 0
       reviewStats.tongDanhGia = response.data.tongDanhGia || 0
     }
   } catch (err) {
