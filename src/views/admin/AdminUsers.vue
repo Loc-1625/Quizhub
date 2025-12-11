@@ -340,7 +340,9 @@ const loadUsers = async () => {
   try {
     const response = await adminService.getUsers({
       ...filter,
-      searchTerm: searchTerm.value
+      searchTerm: searchTerm.value,
+      role: filter.vaiTro,            // Gửi giá trị của 'vaiTro' vào tham số tên là 'role'
+      activeStatus: filter.trangThai  // Gửi giá trị của 'trangThai' vào tham số tên là 'activeStatus'
     })
     users.value = response.data || []
     pagination.currentPage = response.pagination?.currentPage || 1

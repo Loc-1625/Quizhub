@@ -85,7 +85,7 @@
 
     <div v-if="activeTab === 'security'" class="space-y-6">
       <!-- Change Password -->
-      <form @submit.prevent="changePassword" class="card p-6">
+      <form v-if="user?.hasPassword" @submit.prevent="changePassword" class="card p-6">
         <h2 class="section-title mb-4">Đổi mật khẩu</h2>
         
         <div class="space-y-4 max-w-md">
@@ -136,6 +136,29 @@
           </button>
         </div>
       </form>
+      <!-- Không có mật khẩu (User Google) -->
+      <div v-else class="card p-8 text-center">
+        <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Tài khoản liên kết Google</h3>
+        <p class="text-gray-500 max-w-sm mx-auto">
+          Bạn đang đăng nhập bằng tài khoản Google. Vui lòng quản lý mật khẩu và bảo mật tại cài đặt tài khoản Google của bạn.
+        </p>
+        <a 
+          href="https://myaccount.google.com/" 
+          target="_blank" 
+          class="mt-6 inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+        >
+          Đi tới Google Account
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
+
     </div>
   </div>
 </template>
@@ -312,6 +335,7 @@ onMounted(async () => {
   if (!user.value) {
     await authStore.fetchCurrentUser()
   }
+
   loadProfile()
 })
 </script>

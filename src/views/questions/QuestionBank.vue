@@ -43,11 +43,11 @@
           <option value="TrungBinh">Trung bình</option>
           <option value="Kho">Khó</option>
         </select>
-        <select v-model="filter.loaiCauHoi" class="input-field md:w-40" @change="loadQuestions">
+        <!-- <select v-model="filter.loaiCauHoi" class="input-field md:w-40" @change="loadQuestions">
           <option value="">Tất cả loại</option>
           <option value="MotDapAn">Một đáp án</option>
           <option value="NhieuDapAn">Nhiều đáp án</option>
-        </select>
+        </select> -->
       </div>
     </div>
 

@@ -23,13 +23,8 @@
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">
           <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            v-model="searchTerm"
-            type="text"
-            placeholder="Tìm kiếm bài thi..."
-            class="input-field pl-10"
-            @input="debouncedSearch"
-          />
+          <input v-model="searchTerm" type="text" placeholder="Tìm kiếm bài thi..." class="input-field pl-10"
+            @input="debouncedSearch" />
         </div>
         <select v-model="filter.maDanhMuc" class="input-field md:w-48" @change="loadQuizzes">
           <option :value="null">Tất cả danh mục</option>
@@ -54,27 +49,22 @@
           </span>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button 
-            @click="selectAllOnPage" 
-            :class="[
-              'text-sm px-3 py-1.5 rounded border',
-              isAllOnPageSelected 
-                ? 'bg-primary-100 text-primary-700 border-primary-300' 
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            ]"
-          >
+          <button @click="selectAllOnPage" :class="[
+            'text-sm px-3 py-1.5 rounded border',
+            isAllOnPageSelected
+              ? 'bg-primary-100 text-primary-700 border-primary-300'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+          ]">
             {{ isAllOnPageSelected ? '✓ Đã chọn trang này' : 'Chọn trang này' }}
           </button>
-          <button 
-            @click="selectAllPages" 
-            :class="[
-              'text-sm px-3 py-1.5 rounded border',
-              isAllPagesSelected 
-                ? 'bg-primary-100 text-primary-700 border-primary-300' 
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            ]"
-          >
-            {{ isAllPagesSelected ? '✓ Đã chọn tất cả (' + pagination.totalCount + ')' : 'Chọn tất cả (' + pagination.totalCount + ')' }}
+          <button @click="selectAllPages" :class="[
+            'text-sm px-3 py-1.5 rounded border',
+            isAllPagesSelected
+              ? 'bg-primary-100 text-primary-700 border-primary-300'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+          ]">
+            {{ isAllPagesSelected ? '✓ Đã chọn tất cả (' + pagination.totalCount + ')' : 'Chọn tất cả (' +
+              pagination.totalCount + ')' }}
           </button>
           <button @click="clearSelection" class="btn-secondary text-sm">
             Bỏ chọn
@@ -106,44 +96,37 @@
       ]">
         <!-- Checkbox overlay -->
         <div class="absolute top-3 left-3 z-20">
-          <button
-            @click="toggleSelect(quiz.maBaiThi)"
-            :class="[
-              'w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer shadow-md transition-all',
-              selectedQuizzes.includes(quiz.maBaiThi)
-                ? 'bg-primary-600 border-primary-600 text-white'
-                : 'bg-white border-gray-400 hover:border-primary-500'
-            ]"
-          >
+          <button @click="toggleSelect(quiz.maBaiThi)" :class="[
+            'w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer shadow-md transition-all',
+            selectedQuizzes.includes(quiz.maBaiThi)
+              ? 'bg-primary-600 border-primary-600 text-white'
+              : 'bg-white border-gray-400 hover:border-primary-500'
+          ]">
             <CheckIcon v-if="selectedQuizzes.includes(quiz.maBaiThi)" class="w-4 h-4" />
           </button>
         </div>
-        
-        <div class="relative h-32 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-t-xl overflow-hidden ml-0">
-          <img 
-            v-if="quiz.anhBia" 
-            :src="quiz.anhBia" 
-            :alt="quiz.tieuDe"
-            class="w-full h-full object-cover"
-          />
+
+        <div
+          class="relative h-32 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-t-xl overflow-hidden ml-0">
+          <img v-if="quiz.anhBia" :src="quiz.anhBia" :alt="quiz.tieuDe" class="w-full h-full object-cover" />
           <div class="absolute top-2 right-2 flex gap-2 z-10">
             <span v-if="quiz.cheDoCongKhai === 'CongKhai'" class="badge badge-success">
-    Công khai
-  </span>
+              Công khai
+            </span>
 
-  <span v-else-if="quiz.cheDoCongKhai === 'RiengTu'" class="badge bg-gray-100 text-gray-700">
-    Riêng tư
-  </span>
+            <span v-else-if="quiz.cheDoCongKhai === 'RiengTu'" class="badge bg-gray-100 text-gray-700">
+              Riêng tư
+            </span>
 
-  <span v-else class="badge bg-yellow-100 text-yellow-700">
-    Có mật khẩu
-  </span>
+            <span v-else class="badge bg-yellow-100 text-yellow-700">
+              Có mật khẩu
+            </span>
           </div>
         </div>
 
         <div class="p-4">
           <h3 class="font-semibold text-gray-900 line-clamp-1 mb-2">{{ quiz.tieuDe }}</h3>
-          
+
           <div class="flex items-center gap-4 text-sm text-gray-500 mb-3">
             <span class="flex items-center">
               <DocumentTextIcon class="w-4 h-4 mr-1" />
@@ -163,27 +146,20 @@
           <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg mb-3">
             <span class="text-xs text-gray-500">Mã:</span>
             <code class="text-sm font-mono font-medium text-primary-600">{{ quiz.maTruyCapDinhDanh }}</code>
-            <button 
-              @click="copyCode(quiz.maTruyCapDinhDanh)"
-              class="ml-auto p-1 hover:bg-gray-200 rounded"
-            >
+            <button @click="copyCode(quiz.maTruyCapDinhDanh)" class="ml-auto p-1 hover:bg-gray-200 rounded">
               <ClipboardDocumentIcon class="w-4 h-4 text-gray-500" />
             </button>
           </div>
 
           <!-- Actions -->
           <div class="flex gap-2">
-            <router-link 
-              :to="{ name: 'quiz-detail', params: { id: quiz.maBaiThi } }"
-              class="btn-secondary flex-1 text-sm justify-center"
-            >
+            <router-link :to="{ name: 'quiz-detail', params: { id: quiz.maBaiThi } }"
+              class="btn-secondary flex-1 text-sm justify-center">
               <EyeIcon class="w-4 h-4 mr-1" />
               Xem
             </router-link>
-            <router-link 
-              :to="{ name: 'quiz-edit', params: { id: quiz.maBaiThi } }"
-              class="btn-secondary flex-1 text-sm justify-center"
-            >
+            <router-link :to="{ name: 'quiz-edit', params: { id: quiz.maBaiThi } }"
+              class="btn-secondary flex-1 text-sm justify-center">
               <PencilIcon class="w-4 h-4 mr-1" />
               Sửa
             </router-link>
@@ -191,46 +167,35 @@
               <MenuButton class="btn-secondary text-sm px-2">
                 <EllipsisVerticalIcon class="w-5 h-5" />
               </MenuButton>
-              <transition
-                enter-active-class="transition duration-100 ease-out"
-                enter-from-class="transform scale-95 opacity-0"
-                enter-to-class="transform scale-100 opacity-100"
-                leave-active-class="transition duration-75 ease-in"
-                leave-from-class="transform scale-100 opacity-100"
-                leave-to-class="transform scale-95 opacity-0"
-              >
-                <MenuItems class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+              <transition enter-active-class="transition duration-100 ease-out"
+                enter-from-class="transform scale-95 opacity-0" enter-to-class="transform scale-100 opacity-100"
+                leave-active-class="transition duration-75 ease-in" leave-from-class="transform scale-100 opacity-100"
+                leave-to-class="transform scale-95 opacity-0">
+                <MenuItems
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                   <MenuItem v-slot="{ active }">
-                    <router-link
-                      :to="{ name: 'quiz-participants', params: { id: quiz.maBaiThi } }"
-                      :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-gray-700']"
-                    >
-                      Xem người làm bài
-                    </router-link>
+                  <router-link :to="{ name: 'quiz-participants', params: { id: quiz.maBaiThi } }"
+                    :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-gray-700']">
+                    Xem người làm bài
+                  </router-link>
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
-                    <button
-                      @click="viewQuizQuestions(quiz)"
-                      :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-gray-700']"
-                    >
-                      Xem câu hỏi và đáp án
-                    </button>
+                  <button @click="viewQuizQuestions(quiz)"
+                    :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-gray-700']">
+                    Xem câu hỏi và đáp án
+                  </button>
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
-                    <button
-                      @click="toggleVisibility(quiz)"
-                      :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-gray-700']"
-                    >
-                      {{ quiz.cheDoCongKhai === 'CongKhai' ? 'Chuyển riêng tư' : 'Chuyển công khai' }}
-                    </button>
+                  <button @click="toggleVisibility(quiz)"
+                    :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-gray-700']">
+                    {{ quiz.cheDoCongKhai === 'CongKhai' ? 'Chuyển riêng tư' : 'Chuyển công khai' }}
+                  </button>
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
-                    <button
-                      @click="confirmDelete(quiz)"
-                      :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-red-600']"
-                    >
-                      Xóa bài thi
-                    </button>
+                  <button @click="confirmDelete(quiz)"
+                    :class="[active ? 'bg-gray-50' : '', 'flex w-full items-center px-4 py-2 text-sm text-red-600']">
+                    Xóa bài thi
+                  </button>
                   </MenuItem>
                 </MenuItems>
               </transition>
@@ -254,45 +219,32 @@
     <!-- Pagination -->
     <div v-if="pagination.totalPages > 1" class="mt-8 flex justify-center">
       <nav class="flex items-center gap-2">
-        <button
-          @click="goToPage(pagination.currentPage - 1)"
-          :disabled="pagination.currentPage === 1"
-          :class="[
-            'px-3 py-2 rounded border',
-            pagination.currentPage === 1 
-              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
-              : 'btn-secondary'
-          ]"
-        >
+        <button @click="goToPage(pagination.currentPage - 1)" :disabled="pagination.currentPage === 1" :class="[
+          'px-3 py-2 rounded border',
+          pagination.currentPage === 1
+            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+            : 'btn-secondary'
+        ]">
           <ChevronLeftIcon class="w-5 h-5" />
         </button>
         <span class="px-4 py-2 text-gray-700">
           Trang {{ pagination.currentPage }} / {{ pagination.totalPages }}
         </span>
-        <button
-          @click="goToPage(pagination.currentPage + 1)"
-          :disabled="pagination.currentPage === pagination.totalPages"
-          :class="[
+        <button @click="goToPage(pagination.currentPage + 1)"
+          :disabled="pagination.currentPage === pagination.totalPages" :class="[
             'px-3 py-2 rounded border',
-            pagination.currentPage === pagination.totalPages 
-              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+            pagination.currentPage === pagination.totalPages
+              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
               : 'btn-secondary'
-          ]"
-        >
+          ]">
           <ChevronRightIcon class="w-5 h-5" />
         </button>
-        
+
         <!-- Page input -->
         <div class="flex items-center gap-1 ml-2">
-          <input 
-            type="number" 
-            v-model.number="goToPageInput"
-            @keyup.enter="goToPageNumber"
-            min="1"
-            :max="pagination.totalPages"
-            placeholder="Trang"
-            class="w-16 px-2 py-2 text-sm border border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500"
-          />
+          <input type="number" v-model.number="goToPageInput" @keyup.enter="goToPageNumber" min="1"
+            :max="pagination.totalPages" placeholder="Trang"
+            class="w-16 px-2 py-2 text-sm border border-gray-300 rounded focus:ring-primary-500 focus:border-primary-500" />
           <button @click="goToPageNumber" class="btn-secondary px-3 py-2 text-sm">Đi</button>
         </div>
       </nav>
@@ -301,27 +253,16 @@
     <!-- Delete Confirmation Modal -->
     <TransitionRoot appear :show="showDeleteModal" as="template">
       <Dialog as="div" @close="showDeleteModal = false" class="relative z-50">
-        <TransitionChild
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
+        <TransitionChild enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
+          leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
           <div class="fixed inset-0 bg-black/50" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
           <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
+            <TransitionChild enter="duration-300 ease-out" enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100" leave="duration-200 ease-in" leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95">
               <DialogPanel class="w-full max-w-md transform rounded-2xl bg-white p-6 shadow-xl transition-all">
                 <DialogTitle as="h3" class="text-lg font-semibold text-gray-900">
                   Xác nhận xóa
@@ -354,28 +295,18 @@
     <!-- Questions Modal -->
     <TransitionRoot appear :show="showQuestionsModal" as="template">
       <Dialog as="div" @close="showQuestionsModal = false" class="relative z-50">
-        <TransitionChild
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
+        <TransitionChild enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
+          leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
           <div class="fixed inset-0 bg-black/50" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
           <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-4xl transform rounded-2xl bg-white shadow-xl transition-all h-[700px] flex flex-col">
+            <TransitionChild enter="duration-300 ease-out" enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100" leave="duration-200 ease-in" leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95">
+              <DialogPanel
+                class="w-full max-w-4xl transform rounded-2xl bg-white shadow-xl transition-all h-[700px] flex flex-col">
                 <div class="p-6 border-b flex items-center justify-between shrink-0">
                   <DialogTitle as="h3" class="text-lg font-semibold text-gray-900">
                     Câu hỏi trong bài thi: {{ selectedQuiz?.tieuDe }}
@@ -384,7 +315,7 @@
                     <XMarkIcon class="w-6 h-6" />
                   </button>
                 </div>
-                
+
                 <div class="flex-1 overflow-hidden flex">
                   <div v-if="loadingQuestions" class="flex-1 flex items-center justify-center">
                     <div class="text-center py-8">
@@ -392,29 +323,25 @@
                       <p class="text-gray-500 mt-2">Đang tải câu hỏi...</p>
                     </div>
                   </div>
-                  
+
                   <div v-else-if="quizQuestions.length === 0" class="flex-1 flex items-center justify-center">
                     <div class="text-center py-8">
                       <DocumentTextIcon class="w-12 h-12 text-gray-300 mx-auto" />
                       <p class="text-gray-500 mt-2">Bài thi chưa có câu hỏi nào</p>
                     </div>
                   </div>
-                  
+
                   <template v-else>
                     <!-- Left sidebar - Question numbers -->
                     <div class="w-48 border-r overflow-y-auto p-3 bg-gray-50">
                       <div class="grid grid-cols-5 gap-1.5">
-                        <button
-                          v-for="(question, qIndex) in quizQuestions"
-                          :key="question.maCauHoi || qIndex"
-                          @click="viewingQuestionIndex = qIndex"
-                          :class="[
+                        <button v-for="(question, qIndex) in quizQuestions" :key="question.maCauHoi || qIndex"
+                          @click="viewingQuestionIndex = qIndex" :class="[
                             'w-8 h-8 rounded-lg text-sm font-medium transition-colors flex items-center justify-center',
                             viewingQuestionIndex === qIndex
                               ? 'bg-primary-600 text-white'
                               : 'bg-white border border-gray-200 text-gray-700 hover:bg-primary-50 hover:border-primary-300'
-                          ]"
-                        >
+                          ]">
                           {{ qIndex + 1 }}
                         </button>
                       </div>
@@ -425,16 +352,13 @@
                       <div v-if="currentViewingQuestion" class="flex flex-col h-full">
                         <!-- Navigation buttons - Fixed at top -->
                         <div class="flex justify-between items-center pb-4 border-b mb-4 shrink-0">
-                          <button
-                            @click="viewingQuestionIndex = Math.max(0, viewingQuestionIndex - 1)"
-                            :disabled="viewingQuestionIndex === 0"
-                            :class="[
+                          <button @click="viewingQuestionIndex = Math.max(0, viewingQuestionIndex - 1)"
+                            :disabled="viewingQuestionIndex === 0" :class="[
                               'flex items-center gap-1 px-3 py-1.5 rounded text-sm',
-                              viewingQuestionIndex === 0 
-                                ? 'text-gray-400 cursor-not-allowed' 
+                              viewingQuestionIndex === 0
+                                ? 'text-gray-400 cursor-not-allowed'
                                 : 'text-gray-700 hover:bg-gray-100'
-                            ]"
-                          >
+                            ]">
                             <ChevronLeftIcon class="w-4 h-4" />
                             Câu trước
                           </button>
@@ -443,14 +367,12 @@
                           </span>
                           <button
                             @click="viewingQuestionIndex = Math.min(quizQuestions.length - 1, viewingQuestionIndex + 1)"
-                            :disabled="viewingQuestionIndex === quizQuestions.length - 1"
-                            :class="[
+                            :disabled="viewingQuestionIndex === quizQuestions.length - 1" :class="[
                               'flex items-center gap-1 px-3 py-1.5 rounded text-sm',
-                              viewingQuestionIndex === quizQuestions.length - 1 
-                                ? 'text-gray-400 cursor-not-allowed' 
+                              viewingQuestionIndex === quizQuestions.length - 1
+                                ? 'text-gray-400 cursor-not-allowed'
                                 : 'text-gray-700 hover:bg-gray-100'
-                            ]"
-                          >
+                            ]">
                             Câu sau
                             <ChevronRightIcon class="w-4 h-4" />
                           </button>
@@ -458,61 +380,61 @@
 
                         <!-- Question content - Scrollable -->
                         <div class="flex-1 overflow-y-auto space-y-4">
-                        <!-- Question header -->
-                        <div class="flex items-start gap-3">
-                          <span class="w-10 h-10 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-base font-semibold shrink-0">
-                            {{ viewingQuestionIndex + 1 }}
-                          </span>
-                          <div class="flex-1">
-                            <p class="text-gray-900 font-medium whitespace-pre-wrap text-base">{{ currentViewingQuestion.noiDungCauHoi }}</p>
-                            <div class="flex gap-2 mt-2">
-                              <span :class="[
-                                'text-xs px-2 py-0.5 rounded',
-                                currentViewingQuestion.mucDo === 'De' ? 'bg-green-100 text-green-700' :
-                                currentViewingQuestion.mucDo === 'TrungBinh' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-red-100 text-red-700'
-                              ]">
-                                {{ currentViewingQuestion.mucDo === 'De' ? 'Dễ' : currentViewingQuestion.mucDo === 'TrungBinh' ? 'Trung bình' : 'Khó' }}
-                              </span>
+                          <!-- Question header -->
+                          <div class="flex items-start gap-3">
+                            <span
+                              class="w-10 h-10 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-base font-semibold shrink-0">
+                              {{ viewingQuestionIndex + 1 }}
+                            </span>
+                            <div class="flex-1">
+                              <p class="text-gray-900 font-medium whitespace-pre-wrap text-base">{{
+                                currentViewingQuestion.noiDungCauHoi }}</p>
+                              <div class="flex gap-2 mt-2">
+                                <span :class="[
+                                  'text-xs px-2 py-0.5 rounded',
+                                  currentViewingQuestion.mucDo === 'De' ? 'bg-green-100 text-green-700' :
+                                    currentViewingQuestion.mucDo === 'TrungBinh' ? 'bg-yellow-100 text-yellow-700' :
+                                      'bg-red-100 text-red-700'
+                                ]">
+                                  {{ currentViewingQuestion.mucDo === 'De' ? 'Dễ' : currentViewingQuestion.mucDo ===
+                                  'TrungBinh' ? 'Trung bình' : 'Khó' }}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        
-                        <!-- Answer options -->
-                        <div class="ml-13 space-y-2">
-                          <div 
-                            v-for="(option, oIndex) in currentViewingQuestion.cacLuaChon" 
-                            :key="oIndex"
-                            :class="[
+
+                          <!-- Answer options -->
+                          <div class="ml-13 space-y-2">
+                            <div v-for="(option, oIndex) in currentViewingQuestion.cacLuaChon" :key="oIndex" :class="[
                               'flex items-center gap-3 p-3 rounded-lg',
                               option.laDapAnDung ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
-                            ]"
-                          >
-                            <span :class="[
-                              'w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium shrink-0',
-                              option.laDapAnDung ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
                             ]">
-                              {{ String.fromCharCode(65 + oIndex) }}
-                            </span>
-                            <span :class="option.laDapAnDung ? 'text-green-700 font-medium' : 'text-gray-700'">
-                              {{ option.noiDung }}
-                            </span>
-                            <CheckCircleIcon v-if="option.laDapAnDung" class="w-5 h-5 text-green-500 ml-auto" />
+                              <span :class="[
+                                'w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium shrink-0',
+                                option.laDapAnDung ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+                              ]">
+                                {{ String.fromCharCode(65 + oIndex) }}
+                              </span>
+                              <span :class="option.laDapAnDung ? 'text-green-700 font-medium' : 'text-gray-700'">
+                                {{ option.noiDung }}
+                              </span>
+                              <CheckCircleIcon v-if="option.laDapAnDung" class="w-5 h-5 text-green-500 ml-auto" />
+                            </div>
                           </div>
-                        </div>
-                        
-                        <!-- Explanation -->
-                        <div v-if="currentViewingQuestion.giaiThich" class="ml-13 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                          <p class="text-sm text-blue-800">
-                            <span class="font-medium">Giải thích:</span> {{ currentViewingQuestion.giaiThich }}
-                          </p>
-                        </div>
+
+                          <!-- Explanation -->
+                          <div v-if="currentViewingQuestion.giaiThich"
+                            class="ml-13 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <p class="text-sm text-blue-800">
+                              <span class="font-medium">Giải thích:</span> {{ currentViewingQuestion.giaiThich }}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </template>
                 </div>
-                
+
                 <div class="p-4 border-t flex justify-end">
                   <button @click="showQuestionsModal = false" class="btn-secondary">
                     Đóng
@@ -667,7 +589,7 @@ const viewQuizQuestions = async (quiz) => {
   loadingQuestions.value = true
   quizQuestions.value = []
   viewingQuestionIndex.value = 0
-  
+
   try {
     const response = await quizService.getQuestionsDetail(quiz.maBaiThi)
     if (response.success && response.data) {
@@ -703,7 +625,7 @@ const confirmDelete = (quiz) => {
 
 const deleteQuiz = async () => {
   if (!quizToDelete.value) return
-  
+
   try {
     await quizService.deleteQuiz(quizToDelete.value.maBaiThi)
     showDeleteModal.value = false
@@ -783,14 +705,14 @@ const confirmBulkDelete = () => {
 
 const bulkDeleteQuizzes = async () => {
   if (selectedQuizzes.value.length === 0) return
-  
+
   const totalToDelete = selectedQuizzes.value.length
   let successCount = 0
   let failCount = 0
-  
+
   // Close modal immediately
   showDeleteModal.value = false
-  
+
   // Delete quizzes one by one
   for (const id of selectedQuizzes.value) {
     try {
@@ -801,7 +723,7 @@ const bulkDeleteQuizzes = async () => {
       failCount++
     }
   }
-  
+
   // Show result
   if (failCount === 0) {
     // Xóa thành công - không cần thông báo
@@ -810,7 +732,7 @@ const bulkDeleteQuizzes = async () => {
   } else {
     toast.error('Không thể xóa bài thi. Vui lòng thử lại.')
   }
-  
+
   selectedQuizzes.value = []
   loadQuizzes()
 }
