@@ -35,7 +35,7 @@
         <select v-model="filter.sortBy" class="input-field md:w-40" @change="loadQuizzes">
           <option value="NgayTao">Ngày tạo</option>
           <option value="TongLuotLamBai">Lượt làm</option>
-          <option value="TieuDe">Tên bài thi</option>
+          <option value="XepHangTrungBinh">Đánh giá cao</option>
         </select>
       </div>
     </div>
@@ -139,6 +139,10 @@
             <span class="flex items-center">
               <CalendarIcon class="w-4 h-4 mr-1" />
               {{ formatDate(quiz.ngayTao) }}
+            </span>
+            <span v-if="quiz.xepHangTrungBinh" class="flex items-center font-medium">
+              <StarIcon class="w-4 h-4 mr-1 text-yellow-400 fill-yellow-400" />
+              {{ quiz.xepHangTrungBinh.toFixed(1) }}
             </span>
           </div>
 
@@ -397,7 +401,7 @@
                                       'bg-red-100 text-red-700'
                                 ]">
                                   {{ currentViewingQuestion.mucDo === 'De' ? 'Dễ' : currentViewingQuestion.mucDo ===
-                                  'TrungBinh' ? 'Trung bình' : 'Khó' }}
+                                    'TrungBinh' ? 'Trung bình' : 'Khó' }}
                                 </span>
                               </div>
                             </div>
@@ -481,6 +485,7 @@ import {
   CheckCircleIcon,
   CheckIcon
 } from '@heroicons/vue/24/outline'
+import { StarIcon } from '@heroicons/vue/24/solid'
 import { quizService, categoryService } from '@/services'
 import { useAuthStore } from '@/stores/auth'
 
@@ -726,7 +731,6 @@ const bulkDeleteQuizzes = async () => {
 
   // Show result
   if (failCount === 0) {
-    // Xóa thành công - không cần thông báo
   } else if (successCount > 0) {
     toast.warning(`Đã xóa ${successCount}/${totalToDelete} bài thi. ${failCount} bài không thể xóa.`)
   } else {

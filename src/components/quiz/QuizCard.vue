@@ -108,7 +108,6 @@ import {
   LockClosedIcon,
   CalendarIcon
 } from '@heroicons/vue/24/outline'
-import { StarIcon as StarSolidIcon } from '@heroicons/vue/24/solid'
 
 const props = defineProps({
   quiz: {
