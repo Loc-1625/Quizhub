@@ -524,7 +524,7 @@ const filter = reactive({
   sortBy: 'NgayTao',
   sortOrder: 'DESC',
   pageNumber: 1,
-  pageSize: 12
+  pageSize: 9
 })
 
 const pagination = reactive({
@@ -553,6 +553,7 @@ const loadQuizzes = async () => {
     pagination.currentPage = response.pagination?.currentPage || 1
     pagination.totalPages = response.pagination?.totalPages || 1
     pagination.totalCount = response.pagination?.totalCount || 0
+    goToPageInput.value = pagination.currentPage
   } catch (error) {
     console.error('Failed to load quizzes:', error)
     toast.error('Không thể tải danh sách bài thi')

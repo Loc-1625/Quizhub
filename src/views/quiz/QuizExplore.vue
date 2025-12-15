@@ -84,40 +84,50 @@
     </div>
 
     <!-- Pagination -->
-    <div v-if="pagination.totalPages > 1" class="mt-8 flex justify-center">
-      <nav class="flex items-center gap-2">
-        <button
-          @click="goToPage(pagination.currentPage - 1)"
-          :disabled="pagination.currentPage === 1"
-          class="btn-secondary px-3 py-2"
-        >
-          <ChevronLeftIcon class="w-5 h-5" />
-        </button>
-        
-        <template v-for="page in visiblePages" :key="page">
-          <button
-            v-if="page !== '...'"
-            @click="goToPage(page)"
-            :class="[
-              'px-4 py-2 rounded-lg font-medium transition-colors',
-              page === pagination.currentPage
-                ? 'bg-primary-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-            ]"
-          >
-            {{ page }}
-          </button>
-          <span v-else class="px-2 text-gray-500">...</span>
-        </template>
+    <div v-if="pagination.totalPages > 1" class="mt-8 flex justify-center items-center gap-2 pb-8">
+      
+      <!-- Nút Trước (<) -->
+      <button
+        @click="goToPage(pagination.currentPage - 1)"
+        :disabled="pagination.currentPage === 1"
+        class="p-2.5 rounded-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        title="Trang trước"
+      >
+        <ChevronLeftIcon class="w-5 h-5" />
+      </button>
 
-        <button
-          @click="goToPage(pagination.currentPage + 1)"
-          :disabled="pagination.currentPage === pagination.totalPages"
-          class="btn-secondary px-3 py-2"
+      <!-- Text: Trang X / Y -->
+      <span class="text-gray-700 font-medium px-2 text-sm">
+        Trang {{ pagination.currentPage }} / {{ pagination.totalPages }}
+      </span>
+
+      <!-- Nút Sau (>) -->
+      <button
+        @click="goToPage(pagination.currentPage + 1)"
+        :disabled="pagination.currentPage === pagination.totalPages"
+        class="p-2.5 rounded-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        title="Trang sau"
+      >
+        <ChevronRightIcon class="w-5 h-5" />
+      </button>
+
+      <!-- Ô nhập trang -->
+      <div class="flex items-center gap-2 ml-2">
+        <input 
+          type="number" 
+          v-model.number="pageInput"
+          @keyup.enter="goToPageInput"
+          min="1"
+          :max="pagination.totalPages"
+          class="w-16 p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center"
+        />
+        <button 
+          @click="goToPageInput" 
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          <ChevronRightIcon class="w-5 h-5" />
+          Đi
         </button>
-      </nav>
+      </div>
     </div>
   </div>
 </template>
@@ -142,13 +152,14 @@ const quizzes = ref([])
 const categories = ref([])
 const searchTerm = ref('')
 const joinCode = ref('')
+const pageInput = ref(1)
 
 const filter = reactive({
   maDanhMuc: '',
   sortBy: 'NgayTao',  // Mặc định: Mới nhất
   sortOrder: 'DESC',
   pageNumber: 1,
-  pageSize: 8  // Hiển thị tối đa 8 bài thi
+  pageSize: 4  // Hiển thị tối đa 8 bài thi
 })
 
 const pagination = reactive({
@@ -201,6 +212,8 @@ const loadQuizzes = async () => {
     pagination.currentPage = response.pagination?.currentPage || 1
     pagination.totalPages = response.pagination?.totalPages || 1
     pagination.totalCount = response.pagination?.totalCount || 0
+
+    pageInput.value = pagination.currentPage
   } catch (error) {
     console.error('Failed to load quizzes:', error)
   } finally {

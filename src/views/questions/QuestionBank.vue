@@ -367,7 +367,7 @@ const filter = reactive({
   mucDo: '',
   loaiCauHoi: '',
   pageNumber: 1,
-  pageSize: 20
+  pageSize: 10
 })
 
 const pagination = reactive({
@@ -403,6 +403,7 @@ const loadQuestions = async () => {
     pagination.currentPage = response.pagination?.currentPage || 1
     pagination.totalPages = response.pagination?.totalPages || 1
     pagination.totalCount = response.pagination?.totalCount || 0
+    goToPageInput.value = pagination.currentPage
   } catch (error) {
     console.error('Failed to load questions:', error)
     toast.error('Không thể tải danh sách câu hỏi')

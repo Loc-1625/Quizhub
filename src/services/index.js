@@ -260,6 +260,12 @@ export const questionService = {
       params: { pageNumber, pageSize }
     })
     return response.data
+  },
+
+  // Get question answer detail for admin
+  async getQuestionAnswerByAdmin(id) {
+    const response = await api.get(`/Admin/Answer/${id}`)
+    return response.data
   }
 }
 
@@ -557,6 +563,11 @@ export const adminService = {
 
   // Get all content
   async getContent(params = {}) {
+    const response = await api.get('/Admin/content', { params })
+    return response.data
+  },
+
+  async getAllContent(params = {}) {
     const response = await api.get('/Admin/content', { params })
     return response.data
   },

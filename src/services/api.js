@@ -2,8 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
-// Sử dụng relative URL để tận dụng Vite proxy trong development
-// Trong production, dùng VITE_API_URL
+
 const baseURL = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || '/api')
 
 const api = axios.create({
