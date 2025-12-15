@@ -268,7 +268,7 @@
     <!-- Pagination CÂU HỎI -->
     <div v-if="questionPagination.totalPages > 1" class="mt-8 flex justify-center pb-8">
       <nav class="flex items-center gap-2">
-        <!-- Nút Trước -->
+
         <button 
           @click="changeQuestionPage(questionPagination.currentPage - 1)" 
           :disabled="questionPagination.currentPage === 1" 
@@ -282,12 +282,10 @@
           <ChevronLeftIcon class="w-5 h-5" />
         </button>
 
-        <!-- Thông tin trang -->
         <span class="px-4 py-2 text-gray-700 font-medium">
           Trang {{ questionPagination.currentPage }} / {{ questionPagination.totalPages }}
         </span>
 
-        <!-- Nút Sau -->
         <button 
           @click="changeQuestionPage(questionPagination.currentPage + 1)"
           :disabled="questionPagination.currentPage === questionPagination.totalPages" 
@@ -301,7 +299,6 @@
           <ChevronRightIcon class="w-5 h-5" />
         </button>
 
-        <!-- Ô nhập trang -->
         <div class="flex items-center gap-1 ml-2">
           <input 
             type="number" 
@@ -323,7 +320,7 @@
     </div>
     </div>
 
-    <!-- Question Detail Modal (moved to root to avoid click propagation) -->
+    <!-- Question Detail Modal -->
     <TransitionRoot appear :show="showQuestionDetailModal" as="template">
       <Dialog as="div" @close="showQuestionDetailModal = false" class="relative z-50">
         <TransitionChild
