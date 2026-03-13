@@ -65,9 +65,9 @@
               <input
                 id="password"
                 v-model="form.password"
+                placeholder="Mật khẩu của bạn"
                 :type="showPassword ? 'text' : 'password'"
                 required
-                placeholder="Ít nhất 8 ký tự, gồm chữ hoa, thường và số"
                 class="input-field pl-10 pr-10"
                 :class="{ 'border-red-500 focus:ring-red-500': errors.password }"
               />
@@ -84,17 +84,20 @@
             <!-- Password strength indicator -->
             <div v-if="form.password" class="mt-2">
               <div class="flex items-center gap-2 text-xs flex-wrap">
-                <span :class="form.password.length >= 8 ? 'text-green-600' : 'text-gray-400'">
+                <span :class="passwordChecks.minLength ? 'text-green-600' : 'text-gray-400'">
                   ✓ Ít nhất 8 ký tự
                 </span>
-                <span :class="/[a-z]/.test(form.password) ? 'text-green-600' : 'text-gray-400'">
+                <span :class="passwordChecks.lower ? 'text-green-600' : 'text-gray-400'">
                   ✓ Chữ thường
                 </span>
-                <span :class="/[A-Z]/.test(form.password) ? 'text-green-600' : 'text-gray-400'">
+                <span :class="passwordChecks.upper ? 'text-green-600' : 'text-gray-400'">
                   ✓ Chữ hoa
                 </span>
-                <span :class="/[0-9]/.test(form.password) ? 'text-green-600' : 'text-gray-400'">
+                <span :class="passwordChecks.digit ? 'text-green-600' : 'text-gray-400'">
                   ✓ Chữ số
+                </span>
+                <span :class="passwordChecks.special ? 'text-green-600' : 'text-gray-400'">
+                  ✓ Ký tự đặc biệt
                 </span>
               </div>
             </div>
@@ -178,7 +181,7 @@
 <script setup>
 import axios from 'axios' 
 import { googleTokenLogin } from 'vue3-google-login'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   UserIcon,
@@ -212,6 +215,48 @@ const errors = reactive({
   agree: ''
 })
 
+const PASSWORD_RULES = {
+  minLength: 8,
+  lower: /[a-z]/,
+  upper: /[A-Z]/,
+  digit: /[0-9]/,
+  special: /[^A-Za-z0-9]/
+}
+
+const passwordChecks = computed(() => {
+  const password = form.password || ''
+
+  return {
+    minLength: password.length >= PASSWORD_RULES.minLength,
+    lower: PASSWORD_RULES.lower.test(password),
+    upper: PASSWORD_RULES.upper.test(password),
+    digit: PASSWORD_RULES.digit.test(password),
+    special: PASSWORD_RULES.special.test(password)
+  }
+})
+
+const getPasswordError = () => {
+  if (!form.password) return 'Vui lòng nhập mật khẩu'
+
+  if (!passwordChecks.value.minLength) {
+    return 'Mật khẩu phải có ít nhất 8 ký tự'
+  }
+  if (!passwordChecks.value.lower) {
+    return 'Mật khẩu phải có ít nhất 1 chữ thường (a-z)'
+  }
+  if (!passwordChecks.value.upper) {
+    return 'Mật khẩu phải có ít nhất 1 chữ hoa (A-Z)'
+  }
+  if (!passwordChecks.value.digit) {
+    return 'Mật khẩu phải có ít nhất 1 chữ số (0-9)'
+  }
+  if (!passwordChecks.value.special) {
+    return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt'
+  }
+
+  return ''
+}
+
 const validateForm = () => {
   let valid = true
   Object.keys(errors).forEach(key => errors[key] = '')
@@ -229,20 +274,9 @@ const validateForm = () => {
     valid = false
   }
 
-  if (!form.password) {
-    errors.password = 'Vui lòng nhập mật khẩu'
-    valid = false
-  } else if (form.password.length < 8) {
-    errors.password = 'Mật khẩu phải có ít nhất 8 ký tự'
-    valid = false
-  } else if (!/[a-z]/.test(form.password)) {
-    errors.password = 'Mật khẩu phải có ít nhất 1 chữ thường (a-z)'
-    valid = false
-  } else if (!/[A-Z]/.test(form.password)) {
-    errors.password = 'Mật khẩu phải có ít nhất 1 chữ hoa (A-Z)'
-    valid = false
-  } else if (!/[0-9]/.test(form.password)) {
-    errors.password = 'Mật khẩu phải có ít nhất 1 chữ số (0-9)'
+  const passwordError = getPasswordError()
+  if (passwordError) {
+    errors.password = passwordError
     valid = false
   }
 
