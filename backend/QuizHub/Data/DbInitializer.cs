@@ -45,6 +45,25 @@ namespace QuizHub.Data
                 }
             }
 
+            // Tạo danh mục mẫu nếu chưa có
+            if (!await context.DanhMuc.AnyAsync())
+            {
+                var danhMucs = new List<DanhMuc>
+                {
+                    new DanhMuc { TenDanhMuc = "Toán học", MoTa = "Các câu hỏi và bài thi môn Toán học", DuongDan = "toan-hoc" },
+                    new DanhMuc { TenDanhMuc = "Vật lý", MoTa = "Các câu hỏi và bài thi môn Vật lý", DuongDan = "vat-ly" },
+                    new DanhMuc { TenDanhMuc = "Hóa học", MoTa = "Các câu hỏi và bài thi môn Hóa học", DuongDan = "hoa-hoc" },
+                    new DanhMuc { TenDanhMuc = "Tiếng Anh", MoTa = "Các câu hỏi và bài thi môn Tiếng Anh", DuongDan = "tieng-anh" },
+                    new DanhMuc { TenDanhMuc = "Lập trình", MoTa = "Kiến thức công nghệ thông tin và lập trình", DuongDan = "lap-trinh" },
+                    new DanhMuc { TenDanhMuc = "Lịch sử", MoTa = "Các câu hỏi về kiến thức lịch sử", DuongDan = "lich-su" },
+                    new DanhMuc { TenDanhMuc = "Địa lý", MoTa = "Các câu hỏi về kiến thức địa lý", DuongDan = "dia-ly" },
+                    new DanhMuc { TenDanhMuc = "Sinh học", MoTa = "Các câu hỏi về kiến thức sinh học", DuongDan = "sinh-hoc" },
+                };
+
+                await context.DanhMuc.AddRangeAsync(danhMucs);
+                await context.SaveChangesAsync();
+            }
+
             // Recalculate điểm trung bình từ đánh giá (một lần)
             await RecalculateRatingsAsync(context);
         }
