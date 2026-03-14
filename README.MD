@@ -10,6 +10,36 @@ Tech stack:
 - Database: Microsoft SQL Server
 - ORM: Entity Framework Core (Migration + seed)
 
+## 0. First-time setup after git pull
+
+This project does not commit real secret files.
+After pulling source code, create your local config files from templates.
+
+### 0.1 Windows (PowerShell)
+
+Run from project root:
+
+```powershell
+Copy-Item .env.example .env
+Copy-Item frontend/.env.example frontend/.env
+Copy-Item backend/QuizHub/appsettings.template.json backend/QuizHub/appsettings.Development.json
+```
+
+### 0.2 macOS/Linux
+
+Run from project root:
+
+```bash
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+cp backend/QuizHub/appsettings.template.json backend/QuizHub/appsettings.Development.json
+```
+
+Then edit values in:
+- .env (Docker SQL password)
+- frontend/.env (frontend local variables)
+- backend/QuizHub/appsettings.Development.json (backend local secrets/connection string)
+
 ## 1. Run in Local Development
 
 Use this mode when you want fast code changes and debugging.
@@ -39,6 +69,9 @@ cd backend/QuizHub
 
 Check connection string in appsettings for local SQL Server.
 Current local style in this project is Windows Integrated Security.
+
+Recommended local config file:
+- backend/QuizHub/appsettings.Development.json
 
 Run backend:
 
@@ -109,6 +142,10 @@ MSSQL_SA_PASSWORD=QhB_2026#Demo!Sql9
 ```
 
 Use a SQL Server compatible strong password.
+
+Note:
+- Docker mode only needs root .env for docker-compose variables.
+- frontend/.env is mainly for local Vite development.
 
 ### 2.4 Start all services
 
