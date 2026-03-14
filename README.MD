@@ -197,6 +197,19 @@ Stop and remove all (including SQL data):
 docker compose down -v
 ```
 
+### 2.8 Connect to SQL Server Database
+
+You can connect to the SQL Server database running inside Docker using tools like **SQL Server Management Studio (SSMS)**, **Azure Data Studio**, or **DBeaver**.
+
+**Connection details:**
+- **Server Name / Host**: `localhost,1433` (or just `localhost`)
+- **Authentication**: `SQL Server Authentication`
+- **Login / Username**: `sa`
+- **Password**: The password you set in your `.env` file (variable `MSSQL_SA_PASSWORD`)
+- **Trust Server Certificate**: `True` (Important: Check this box/set to true to bypass SSL/TLS certificate errors)
+
+*Note: Data changes made here are saved permanently in the `sqlserver_data` Docker volume.*
+
 ## 3. Common Docker maintenance
 
 Rebuild selected services:
