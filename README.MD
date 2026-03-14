@@ -138,7 +138,7 @@ Build/runtime files:
 Create/update .env at project root:
 
 ```env
-MSSQL_SA_PASSWORD=QhB_2026#Demo!Sql9
+MSSQL_SA_PASSWORD=QhB_2026#Demo!Sql21
 ```
 
 Use a SQL Server compatible strong password.
