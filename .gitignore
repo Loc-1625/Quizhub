@@ -426,3 +426,10 @@ yarn-error.log*
 .DS_Store
 
 appsettings.Production.json
+appsettings.json
+appsettings.Development.json
+appsettings.Local.json
+
+# Runtime upload/generated data
+backend/QuizHub/wwwroot/uploads/
+backend/QuizHub/uploads/
