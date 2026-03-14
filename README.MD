@@ -232,10 +232,38 @@ Data is stored in Docker volume:
 Normal restart keeps data.
 Only docker compose down -v removes it.
 
-### 4.3 Image pull/network errors (MCR EOF)
+### 4.3 IPv6 causes EOF when pulling from MCR
 
-If docker pull from mcr.microsoft.com fails with EOF:
-1. Ensure Docker Desktop engine is running
-2. Disable VPN/proxy/HTTPS inspection if possible
-3. Try another network (for example mobile hotspot)
-4. Retry docker compose up --build
+In some networks, IPv6 routing to mcr.microsoft.com is unstable.
+This can cause EOF errors when pulling Microsoft images, while Docker Hub images still pull normally.
+
+Typical signs:
+- docker pull alpine (or other images) succeeds
+- docker pull mcr.microsoft.com/dotnet/aspnet:9.0 may succeed or fail intermittently
+- docker pull mcr.microsoft.com/mssql/server:2022-latest fails with EOF
+
+How to fix on Windows:
+1. Temporarily disable IPv6 on the active network adapter (Wi-Fi/Ethernet)
+2. Restart Docker Desktop completely
+3. Retry:
+
+```bash
+docker pull mcr.microsoft.com/mssql/server:2022-latest
+docker compose up --build
+```
+
+Optional PowerShell commands (run as Administrator):
+
+```powershell
+# Disable IPv6 binding on Wi-Fi
+Disable-NetAdapterBinding -Name "Wi-Fi" -ComponentID ms_tcpip6
+
+# Re-enable IPv6 binding later (if you need it)
+Enable-NetAdapterBinding -Name "Wi-Fi" -ComponentID ms_tcpip6
+```
+
+If your adapter name is different, replace "Wi-Fi" with the correct adapter name shown by:
+
+```powershell
+Get-NetAdapter | Select-Object Name, Status
+```
