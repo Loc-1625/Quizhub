@@ -67,8 +67,8 @@ Go to backend project folder:
 cd backend/QuizHub
 ```
 
-Check connection string in appsettings for local SQL Server.
-Current local style in this project is Windows Integrated Security.
+> **⚠️ IMPORTANT:** Remember to modify the connection string in your `appsettings` file to match your local SQL Server instance before running!
+> The default template uses Windows Integrated Security (`Server=localhost;Database=QuizHub;Trusted_Connection=True;...`).
 
 Recommended local config file:
 - backend/QuizHub/appsettings.Development.json
