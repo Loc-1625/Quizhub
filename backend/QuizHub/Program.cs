@@ -191,6 +191,12 @@ builder.Services.AddIdentity<NguoiDung, IdentityRole>(options =>
 .AddEntityFrameworkStores<QuizHubDbContext>()
 .AddDefaultTokenProviders();
 
+// Cấu hình thời gian sống của token (ví dụ: 10 phút cho email confirmation, password reset)
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromMinutes(10);
+});
+
 //ĐĂNG KÝ SERVICE
 
 // Đăng ký Argon2PasswordHasher thay vì PBKDF2 mặc định
