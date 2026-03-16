@@ -98,7 +98,7 @@ builder.Services.AddRateLimiter(options =>
         opt.Window = TimeSpan.FromMinutes(1); // Giảm từ 5 phút xuống 1 phút
         opt.SegmentsPerWindow = 6; // 10 giây/segment
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;           // Tăng queue từ 2 lên 10
+        opt.QueueLimit = 0;           // Không cho phép queue để phản hồi nhanh với brute-force attempts
     });
 
     // --------------------------------------------------------
