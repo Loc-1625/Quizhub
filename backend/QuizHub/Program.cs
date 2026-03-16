@@ -90,15 +90,15 @@ builder.Services.AddRateLimiter(options =>
     // --------------------------------------------------------
     // AUTH POLICY: Sliding Window (Relaxed for Testing)
     // Bảo vệ chống brute-force login/register
-    // 50 requests/1 phút per IP - nới lỏng để test (Production nên đặt 5/5phút)
+    // 20 requests/1 phút per IP - nới lỏng để test (Production nên đặt 5/5phút)
     // --------------------------------------------------------
     options.AddSlidingWindowLimiter("auth", opt =>
     {
-        opt.PermitLimit = 20;          // 5 requests
+        opt.PermitLimit = 5;          // 5 requests
         opt.Window = TimeSpan.FromMinutes(1); // Giảm từ 5 phút xuống 1 phút
         opt.SegmentsPerWindow = 6; // 10 giây/segment
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 2;           // Tăng queue từ 2 lên 10
+        opt.QueueLimit = 0;           // Tăng queue từ 2 lên 10
     });
 
     // --------------------------------------------------------
