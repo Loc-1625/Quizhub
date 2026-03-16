@@ -534,7 +534,10 @@ namespace QuizHub.Services.Implementations
                 ? (decimal)soCauDung / luotLamBai.TongSoCauHoi * 10
                 : 0;
 
-            var thoiGianNopBai = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            var thoiGianNopBai = luotLamBai.ThoiGianKetThuc.HasValue && luotLamBai.ThoiGianKetThuc.Value < now
+                ? luotLamBai.ThoiGianKetThuc.Value
+                : now;
             var thoiGianLamBaiThucTe = (int)(thoiGianNopBai - luotLamBai.ThoiGianBatDau).TotalSeconds;
 
             // Cập nhật

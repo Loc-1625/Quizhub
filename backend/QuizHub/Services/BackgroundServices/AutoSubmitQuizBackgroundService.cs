@@ -31,8 +31,8 @@ namespace QuizHub.Services.BackgroundServices
                         await luotLamBaiService.AutoSubmitExpiredQuizzesAsync();
                     }
 
-                    // Chạy mỗi 15 giây để auto-submit
-                    await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
+                    // Chạy mỗi 1 giây để nộp bài gần như ngay khi hết giờ
+                    await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
                 }
                 catch (Exception ex)
                 {
