@@ -311,6 +311,36 @@ const goToQuestion = (index) => {
   currentQuestionIndex.value = index
 }
 
+const shouldRedirectToResult = (message = '') => {
+  const normalized = String(message).toLowerCase()
+  return normalized.includes('session này đã kết thúc') ||
+         normalized.includes('đã hết thời gian làm bài') ||
+         normalized.includes('bài thi đã được nộp')
+}
+
+const redirectToResultIfAvailable = async (sessionId) => {
+  if (!sessionId) return false
+
+  try {
+    const resultResponse = await quizService.getResult(sessionId)
+    if (resultResponse?.success && resultResponse?.data) {
+      const quizId = resultResponse.data.maBaiThi || route.params.id
+      router.replace({
+        name: 'quiz-result',
+        params: {
+          id: quizId,
+          luotLamBaiId: sessionId
+        }
+      })
+      return true
+    }
+  } catch {
+    // Ignore and fallback to old navigation behavior.
+  }
+
+  return false
+}
+
 const submitQuiz = async () => {
   submitting.value = true
   
@@ -367,11 +397,23 @@ const loadSession = async () => {
       // Connect SignalR
       connectSignalR()
     } else {
-      toast.error('Không thể tải bài thi')
+      const message = response.message || 'Không thể tải bài thi'
+      if (shouldRedirectToResult(message)) {
+        const redirected = await redirectToResultIfAvailable(sessionId)
+        if (redirected) return
+      }
+
+      toast.error(message)
       router.push({ name: 'quiz-detail', params: { id: route.params.id } })
     }
   } catch (error) {
-    toast.error('Không thể tải bài thi')
+    const message = error.response?.data?.message || 'Không thể tải bài thi'
+    if (shouldRedirectToResult(message)) {
+      const redirected = await redirectToResultIfAvailable(sessionId)
+      if (redirected) return
+    }
+
+    toast.error(message)
     router.push({ name: 'quiz-detail', params: { id: route.params.id } })
   } finally {
     loading.value = false

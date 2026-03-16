@@ -1,10 +1,13 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import api from '@/services/api'
+import router from '@/router'
 import { useToast } from 'vue-toastification'
 
 export const useAuthStore = defineStore('auth', () => {
   const toast = useToast()
+  const MAX_TIMEOUT_MS = 2147483647
+  let tokenExpiryTimer = null
   
   // State - these will be persisted automatically by pinia-plugin-persistedstate
   const user = ref(null)
@@ -27,6 +30,88 @@ export const useAuthStore = defineStore('auth', () => {
     // Otherwise, prepend the API base URL (without /api)
     return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${avatarPath}`
   })
+
+  function clearTokenExpiryTimer() {
+    if (tokenExpiryTimer) {
+      clearTimeout(tokenExpiryTimer)
+      tokenExpiryTimer = null
+    }
+  }
+
+  function getTokenExpirationDate(authToken) {
+    if (!authToken) return null
+
+    try {
+      const parts = authToken.split('.')
+      if (parts.length !== 3) return null
+
+      const payload = parts[1]
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+      const paddedPayload = payload.padEnd(payload.length + (4 - payload.length % 4) % 4, '=')
+      const decodedPayload = JSON.parse(atob(paddedPayload))
+
+      if (!decodedPayload.exp) return null
+      return new Date(decodedPayload.exp * 1000)
+    } catch {
+      return null
+    }
+  }
+
+  async function handleTokenExpired() {
+    const hadToken = !!token.value
+    await logout()
+
+    if (!hadToken) return
+
+    const currentPath = window.location.pathname + window.location.search
+    const publicPages = ['/', '/explore', '/login', '/register']
+    const redirect = publicPages.includes(window.location.pathname) ? undefined : currentPath
+
+    router.push({
+      name: 'login',
+      query: redirect
+        ? { redirect, sessionExpired: '1' }
+        : { sessionExpired: '1' }
+    })
+  }
+
+  function scheduleTokenExpiryCheck(authToken) {
+    clearTokenExpiryTimer()
+
+    const expirationDate = getTokenExpirationDate(authToken)
+    if (!expirationDate) return
+
+    const remainingMs = expirationDate.getTime() - Date.now()
+
+    if (remainingMs <= 0) {
+      handleTokenExpired()
+      return
+    }
+
+    if (remainingMs > MAX_TIMEOUT_MS) {
+      tokenExpiryTimer = setTimeout(() => {
+        scheduleTokenExpiryCheck(authToken)
+      }, MAX_TIMEOUT_MS)
+      return
+    }
+
+    tokenExpiryTimer = setTimeout(() => {
+      handleTokenExpired()
+    }, remainingMs)
+  }
+
+  watch(
+    token,
+    (newToken) => {
+      if (!newToken) {
+        clearTokenExpiryTimer()
+        return
+      }
+      scheduleTokenExpiryCheck(newToken)
+    },
+    { immediate: true }
+  )
 
   // Actions
   async function login(email, password) {
@@ -78,6 +163,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
   async function logout() {
+    clearTokenExpiryTimer()
     token.value = null
     user.value = null
     delete api.defaults.headers.common['Authorization']
