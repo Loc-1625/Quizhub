@@ -124,6 +124,7 @@ import axios from 'axios'
 import { googleTokenLogin } from 'vue3-google-login'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import {
   EnvelopeIcon,
   LockClosedIcon,
@@ -137,6 +138,7 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const toast = useToast()
 
 const loading = ref(false)
 const showPassword = ref(false)
@@ -154,6 +156,17 @@ const errors = reactive({
 
 // Load thông tin đã lưu khi mount
 onMounted(() => {
+  if (route.query.sessionExpired === '1') {
+    toast.warning('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+
+    const restQuery = { ...route.query }
+    delete restQuery.sessionExpired
+    router.replace({
+      name: 'login',
+      query: restQuery
+    })
+  }
+
   const savedCredentials = localStorage.getItem('quizhub_saved_credentials')
   if (savedCredentials) {
     try {

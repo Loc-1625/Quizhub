@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
+let isHandlingSessionExpired = false
 
 const baseURL = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || '/api')
 
@@ -42,16 +43,29 @@ api.interceptors.response.use(
                             error.config?.url?.includes('/Auth/register') ||
                             error.config?.url?.includes('/Auth/me')
       
-      if (!isAuthEndpoint) {
+      if (!isAuthEndpoint && !isHandlingSessionExpired) {
+        isHandlingSessionExpired = true
         const authStore = useAuthStore()
+        const hadToken = !!authStore.token
         authStore.logout()
         
-        // Lưu URL hiện tại để quay lại sau khi đăng nhập
-        const currentPath = window.location.pathname + window.location.search
-        const publicPages = ['/', '/explore', '/login', '/register']
-        const redirect = publicPages.includes(window.location.pathname) ? undefined : currentPath
-        
-        router.push({ name: 'login', query: redirect ? { redirect } : {} })
+        if (hadToken) {
+          // Lưu URL hiện tại để quay lại sau khi đăng nhập
+          const currentPath = window.location.pathname + window.location.search
+          const publicPages = ['/', '/explore', '/login', '/register']
+          const redirect = publicPages.includes(window.location.pathname) ? undefined : currentPath
+
+          router.push({
+            name: 'login',
+            query: redirect
+              ? { redirect, sessionExpired: '1' }
+              : { sessionExpired: '1' }
+          }).finally(() => {
+            isHandlingSessionExpired = false
+          })
+        } else {
+          isHandlingSessionExpired = false
+        }
       }
     }
     return Promise.reject(error)
