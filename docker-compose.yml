@@ -26,6 +26,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=QuizHubDB;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Your_strong_Password123!};TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true
+      Frontend__BaseUrl: http://localhost:5173
     ports:
       - "5099:8080"
     depends_on:

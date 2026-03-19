@@ -15,19 +15,22 @@ namespace QuizHub.Services.Implementations
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<UserProfileService> _logger;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
         public UserProfileService(
             QuizHubDbContext context,
             UserManager<NguoiDung> userManager,
             IWebHostEnvironment environment,
             ILogger<UserProfileService> logger,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
             _environment = environment;
             _logger = logger;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         public async Task<UserProfileDto?> GetMyProfileAsync(string userId)
@@ -241,19 +244,24 @@ namespace QuizHub.Services.Implementations
                 .Replace("/", "_")
                 .Replace("=", "");
 
-            // Tạo reset link
-            var resetLink = $"https://quizhub.me/reset-password?email={Uri.EscapeDataString(dto.Email)}&token={encodedToken}";
-            
-            // Trong development, có thể dùng localhost
-            #if DEBUG
-            resetLink = $"http://localhost:5173/reset-password?email={Uri.EscapeDataString(dto.Email)}&token={encodedToken}";
-            
-            // Log token để test trong development
-            _logger.LogInformation("=== PASSWORD RESET ===");
-            _logger.LogInformation("Email: {Email}", dto.Email);
-            _logger.LogInformation("Link: {Link}", resetLink);
-            _logger.LogInformation("======================");
-            #endif
+            var frontendBaseUrl = _configuration["Frontend:BaseUrl"];
+            if (string.IsNullOrWhiteSpace(frontendBaseUrl))
+            {
+                frontendBaseUrl = _configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()?.FirstOrDefault()
+                    ?? "http://localhost:5173";
+            }
+
+            // Tạo reset link theo cấu hình để chạy đúng ở localhost/Docker và production.
+            var resetLink =
+                $"{frontendBaseUrl.TrimEnd('/')}/reset-password?email={Uri.EscapeDataString(dto.Email)}&token={encodedToken}";
+
+            if (_environment.IsDevelopment())
+            {
+                _logger.LogInformation("=== PASSWORD RESET ===");
+                _logger.LogInformation("Email: {Email}", dto.Email);
+                _logger.LogInformation("Link: {Link}", resetLink);
+                _logger.LogInformation("======================");
+            }
 
             // Gửi email
             var emailSent = await _emailService.SendPasswordResetEmailAsync(
