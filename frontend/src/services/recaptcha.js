@@ -7,7 +7,7 @@ export function isRecaptchaEnabled() {
 }
 
 export function getRecaptchaVersion() {
-  return String(import.meta.env.VITE_RECAPTCHA_VERSION || 'v2').toLowerCase()
+  return String(import.meta.env.VITE_RECAPTCHA_VERSION || 'v3').toLowerCase()
 }
 
 export function isRecaptchaV2() {

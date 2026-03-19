@@ -7,16 +7,20 @@ import { useToast } from 'vue-toastification'
 export const useAuthStore = defineStore('auth', () => {
   const toast = useToast()
   const MAX_TIMEOUT_MS = 2147483647
-  const IDLE_TIMEOUT_MINUTES = Number(import.meta.env.VITE_IDLE_TIMEOUT_MINUTES || 15)
-  const IDLE_TIMEOUT_MS = Math.max(1, IDLE_TIMEOUT_MINUTES) * 60 * 1000
+  const IDLE_TIMEOUT_SECONDS = Number(import.meta.env.VITE_IDLE_TIMEOUT_SECONDS || 15)
+  const IDLE_WARNING_COUNTDOWN_SECONDS = Number(import.meta.env.VITE_IDLE_WARNING_COUNTDOWN_SECONDS || 15)
+  const IDLE_TIMEOUT_MS = Math.max(1, IDLE_TIMEOUT_SECONDS) * 1000
   const ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart']
   let tokenExpiryTimer = null
   let idleTimer = null
+  let idleWarningTimer = null
   
   // State - these will be persisted automatically by pinia-plugin-persistedstate
   const user = ref(null)
   const token = ref(null)
   const loading = ref(false)
+  const idleWarningVisible = ref(false)
+  const idleWarningCountdown = ref(IDLE_WARNING_COUNTDOWN_SECONDS)
   
   // Getters
   const isLoggedIn = computed(() => !!token.value && !!user.value)
@@ -49,6 +53,18 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function clearIdleWarningTimer() {
+    if (idleWarningTimer) {
+      clearInterval(idleWarningTimer)
+      idleWarningTimer = null
+    }
+  }
+
+  function resetIdleWarningState() {
+    idleWarningVisible.value = false
+    idleWarningCountdown.value = IDLE_WARNING_COUNTDOWN_SECONDS
+  }
+
   function detachIdleListeners() {
     ACTIVITY_EVENTS.forEach((eventName) => {
       window.removeEventListener(eventName, resetIdleTimer)
@@ -66,13 +82,41 @@ export const useAuthStore = defineStore('auth', () => {
     clearIdleTimer()
 
     if (!isLoggedIn.value) return
+    if (idleWarningVisible.value) return
 
-    idleTimer = setTimeout(async () => {
-      await handleIdleTimeout()
+    idleTimer = setTimeout(() => {
+      startIdleWarningCountdown()
     }, IDLE_TIMEOUT_MS)
   }
 
-  async function handleIdleTimeout() {
+  function startIdleWarningCountdown() {
+    clearIdleTimer()
+    clearIdleWarningTimer()
+
+    if (!isLoggedIn.value) return
+
+    idleWarningVisible.value = true
+    idleWarningCountdown.value = IDLE_WARNING_COUNTDOWN_SECONDS
+
+    idleWarningTimer = setInterval(() => {
+      if (!isLoggedIn.value) {
+        clearIdleWarningTimer()
+        resetIdleWarningState()
+        return
+      }
+
+      if (idleWarningCountdown.value <= 1) {
+        clearIdleWarningTimer()
+        resetIdleWarningState()
+        void handleIdleSessionExpired()
+        return
+      }
+
+      idleWarningCountdown.value -= 1
+    }, 1000)
+  }
+
+  async function handleIdleSessionExpired() {
     const hadToken = !!token.value
     await logout()
 
@@ -88,6 +132,15 @@ export const useAuthStore = defineStore('auth', () => {
         ? { redirect, idleExpired: '1' }
         : { idleExpired: '1' }
     })
+  }
+
+  function continueSession() {
+    if (!isLoggedIn.value) return
+
+    clearIdleWarningTimer()
+    resetIdleWarningState()
+    resetIdleTimer()
+    toast.info('Phiên đăng nhập đã được tiếp tục.')
   }
 
   function getTokenExpirationDate(authToken) {
@@ -174,6 +227,8 @@ export const useAuthStore = defineStore('auth', () => {
       } else {
         detachIdleListeners()
         clearIdleTimer()
+        clearIdleWarningTimer()
+        resetIdleWarningState()
       }
     },
     { immediate: true }
@@ -258,6 +313,8 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     clearTokenExpiryTimer()
     clearIdleTimer()
+    clearIdleWarningTimer()
+    resetIdleWarningState()
     detachIdleListeners()
     token.value = null
     user.value = null
@@ -394,6 +451,8 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     loading,
+    idleWarningVisible,
+    idleWarningCountdown,
     // Getters
     isLoggedIn,
     isAdmin,
@@ -404,6 +463,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    continueSession,
     fetchCurrentUser,
     updateProfile,
     uploadAvatar,

@@ -25,6 +25,30 @@
     <Footer v-if="!isQuizTaking && !isAuthPage" />
   </div>
 
+  <div
+    v-if="showIdleWarning"
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+  >
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <h2 class="text-xl font-semibold text-gray-900">Phiên sắp hết hạn</h2>
+      <p class="mt-3 text-sm text-gray-600">
+        Bạn đã không hoạt động trong thời gian dài. Hệ thống sẽ tự đăng xuất sau
+        <span class="font-bold text-red-600">{{ formattedIdleWarningCountdown }}</span>
+        .
+      </p>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+          @click="handleContinueSession"
+        >
+          Tiếp tục
+        </button>
+      </div>
+    </div>
+  </div>
+
   <SpeedInsights />
 </template>
 
@@ -34,8 +58,10 @@ import { useRoute } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
 import { SpeedInsights } from "@vercel/speed-insights/vue"
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const authStore = useAuthStore()
 
 // --- LOGIC BẢO TRÌ ---
 // Kiểm tra biến môi trường VITE_IS_MAINTENANCE
@@ -48,6 +74,21 @@ const isQuizTaking = computed(() => {
 const isAuthPage = computed(() => {
   return route.name === 'login' || route.name === 'register' || route.name === 'forgot-password'
 })
+
+const showIdleWarning = computed(() => authStore.idleWarningVisible)
+const idleWarningCountdown = computed(() => authStore.idleWarningCountdown)
+const formattedIdleWarningCountdown = computed(() => formatAsMinutesSeconds(idleWarningCountdown.value))
+
+function formatAsMinutesSeconds(totalSeconds) {
+  const safeSeconds = Math.max(0, Number(totalSeconds) || 0)
+  const minutes = Math.floor(safeSeconds / 60)
+  const seconds = safeSeconds % 60
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
+function handleContinueSession() {
+  authStore.continueSession()
+}
 </script>
 
 <style>
