@@ -186,7 +186,7 @@ builder.Services.AddIdentity<NguoiDung, IdentityRole>(options =>
 
     // User settings
     options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedEmail = false; // Đổi thành true nếu dùng email confirmation
+    options.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<QuizHubDbContext>()
 .AddDefaultTokenProviders();
@@ -205,6 +205,7 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 // Thêm sau phần AddIdentity
 // Đang ký Services cho Người Dùng
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IRecaptchaService, RecaptchaService>();
 // Đăng ký Services cho Email & Profile
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();

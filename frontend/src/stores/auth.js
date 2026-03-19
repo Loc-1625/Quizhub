@@ -7,7 +7,11 @@ import { useToast } from 'vue-toastification'
 export const useAuthStore = defineStore('auth', () => {
   const toast = useToast()
   const MAX_TIMEOUT_MS = 2147483647
+  const IDLE_TIMEOUT_MINUTES = Number(import.meta.env.VITE_IDLE_TIMEOUT_MINUTES || 15)
+  const IDLE_TIMEOUT_MS = Math.max(1, IDLE_TIMEOUT_MINUTES) * 60 * 1000
+  const ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart']
   let tokenExpiryTimer = null
+  let idleTimer = null
   
   // State - these will be persisted automatically by pinia-plugin-persistedstate
   const user = ref(null)
@@ -36,6 +40,54 @@ export const useAuthStore = defineStore('auth', () => {
       clearTimeout(tokenExpiryTimer)
       tokenExpiryTimer = null
     }
+  }
+
+  function clearIdleTimer() {
+    if (idleTimer) {
+      clearTimeout(idleTimer)
+      idleTimer = null
+    }
+  }
+
+  function detachIdleListeners() {
+    ACTIVITY_EVENTS.forEach((eventName) => {
+      window.removeEventListener(eventName, resetIdleTimer)
+    })
+  }
+
+  function attachIdleListeners() {
+    detachIdleListeners()
+    ACTIVITY_EVENTS.forEach((eventName) => {
+      window.addEventListener(eventName, resetIdleTimer, { passive: true })
+    })
+  }
+
+  function resetIdleTimer() {
+    clearIdleTimer()
+
+    if (!isLoggedIn.value) return
+
+    idleTimer = setTimeout(async () => {
+      await handleIdleTimeout()
+    }, IDLE_TIMEOUT_MS)
+  }
+
+  async function handleIdleTimeout() {
+    const hadToken = !!token.value
+    await logout()
+
+    if (!hadToken) return
+
+    const currentPath = window.location.pathname + window.location.search
+    const publicPages = ['/', '/explore', '/login', '/register']
+    const redirect = publicPages.includes(window.location.pathname) ? undefined : currentPath
+
+    router.push({
+      name: 'login',
+      query: redirect
+        ? { redirect, idleExpired: '1' }
+        : { idleExpired: '1' }
+    })
   }
 
   function getTokenExpirationDate(authToken) {
@@ -113,17 +165,32 @@ export const useAuthStore = defineStore('auth', () => {
     { immediate: true }
   )
 
+  watch(
+    isLoggedIn,
+    (loggedIn) => {
+      if (loggedIn) {
+        attachIdleListeners()
+        resetIdleTimer()
+      } else {
+        detachIdleListeners()
+        clearIdleTimer()
+      }
+    },
+    { immediate: true }
+  )
+
   // Actions
-  async function login(email, password) {
+  async function login(email, password, captchaToken = null) {
     loading.value = true
     try {
-      const response = await api.post('/Auth/login', { email, password })
+      const response = await api.post('/Auth/login', { email, password, captchaToken })
       const data = response.data
       if (data.success) {
         // Backend trả về Token và User (viết hoa)
         token.value = data.token || data.Token
         user.value = data.user || data.User
         api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+        resetIdleTimer()
         return true
       } else {
         toast.error(data.message || data.Message || 'Đăng nhập thất bại')
@@ -138,25 +205,51 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
   
-  async function register(data) {
+  async function register(data, captchaToken = null) {
     loading.value = true
     try {
-      const response = await api.post('/Auth/register', data)
+      const response = await api.post('/Auth/register', {
+        ...data,
+        captchaToken
+      })
       const resData = response.data
       if (resData.success || resData.Success) {
-        // Backend trả về Token và User (viết hoa)
-        token.value = resData.token || resData.Token
-        user.value = resData.user || resData.User
-        api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-        return true
+        const returnedToken = resData.token || resData.Token
+        const returnedUser = resData.user || resData.User
+
+        if (returnedToken && returnedUser) {
+          token.value = returnedToken
+          user.value = returnedUser
+          api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+          resetIdleTimer()
+          return {
+            success: true,
+            requiresEmailConfirmation: false,
+            message: resData.message || resData.Message
+          }
+        }
+
+        return {
+          success: true,
+          requiresEmailConfirmation: true,
+          message: resData.message || resData.Message
+        }
       } else {
         toast.error(resData.message || resData.Message || 'Đăng ký thất bại')
-        return false
+        return {
+          success: false,
+          requiresEmailConfirmation: false,
+          message: resData.message || resData.Message
+        }
       }
     } catch (error) {
       const message = error.response?.data?.message || error.response?.data?.Message || 'Đã xảy ra lỗi khi đăng ký'
       toast.error(message)
-      return false
+      return {
+        success: false,
+        requiresEmailConfirmation: false,
+        message
+      }
     } finally {
       loading.value = false
     }
@@ -164,6 +257,8 @@ export const useAuthStore = defineStore('auth', () => {
   
   async function logout() {
     clearTokenExpiryTimer()
+    clearIdleTimer()
+    detachIdleListeners()
     token.value = null
     user.value = null
     delete api.defaults.headers.common['Authorization']

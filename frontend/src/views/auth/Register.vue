@@ -137,6 +137,13 @@
           </div>
           <p v-if="errors.agree" class="text-sm text-red-500">{{ errors.agree }}</p>
 
+          <div v-if="recaptchaEnabled && useRecaptchaV2">
+            <RecaptchaV2
+              ref="recaptchaRef"
+              v-model="captchaToken"
+            />
+          </div>
+
           <button
             type="submit"
             :disabled="loading"
@@ -183,6 +190,7 @@ import axios from 'axios'
 import { googleTokenLogin } from 'vue3-google-login'
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import {
   UserIcon,
   EnvelopeIcon,
@@ -192,12 +200,19 @@ import {
   ArrowPathIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
+import RecaptchaV2 from '@/components/auth/RecaptchaV2.vue'
+import { isRecaptchaEnabled, isRecaptchaV2, executeRecaptchaV3 } from '@/services/recaptcha'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const toast = useToast()
 
 const loading = ref(false)
 const showPassword = ref(false)
+const recaptchaRef = ref(null)
+const captchaToken = ref('')
+const recaptchaEnabled = isRecaptchaEnabled()
+const useRecaptchaV2 = isRecaptchaV2()
 
 const form = reactive({
   hoTen: '',
@@ -297,15 +312,52 @@ const handleRegister = async () => {
   if (!validateForm()) return
 
   loading.value = true
-  const success = await authStore.register({
+
+  let recaptchaToken = null
+  try {
+    if (recaptchaEnabled) {
+      if (useRecaptchaV2) {
+        if (!captchaToken.value) {
+          loading.value = false
+          toast.warning('Vui lòng xác nhận reCAPTCHA trước khi đăng ký.')
+          return
+        }
+        recaptchaToken = captchaToken.value
+      } else {
+        recaptchaToken = await executeRecaptchaV3('register')
+      }
+    }
+  } catch (error) {
+    loading.value = false
+    toast.error('Không thể xác minh reCAPTCHA. Vui lòng thử lại.')
+    return
+  }
+
+  const result = await authStore.register({
     hoTen: form.hoTen,
     email: form.email,
     password: form.password,
     confirmPassword: form.confirmPassword
-  })
+  }, recaptchaToken)
+
+  if (!result.success && recaptchaEnabled && useRecaptchaV2) {
+    recaptchaRef.value?.reset()
+  }
+
   loading.value = false
 
-  if (success) {
+  if (result.success) {
+    if (result.requiresEmailConfirmation) {
+      router.push({
+        name: 'login',
+        query: {
+          emailConfirmationPending: '1',
+          email: form.email
+        }
+      })
+      return
+    }
+
     router.push('/dashboard')
   }
 }

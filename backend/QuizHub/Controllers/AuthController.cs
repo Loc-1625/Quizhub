@@ -18,6 +18,7 @@ namespace QuizHub.Controllers
         private readonly UserManager<NguoiDung> _userManager;
         private readonly SignInManager<NguoiDung> _signInManager;
         private readonly IJwtService _jwtService;
+        private readonly IRecaptchaService _recaptchaService;
         private readonly IUserProfileService _profileService;
         private readonly IEmailService _emailService;
         private readonly ILogger<AuthController> _logger;
@@ -27,6 +28,7 @@ namespace QuizHub.Controllers
             UserManager<NguoiDung> userManager,
             SignInManager<NguoiDung> signInManager,
             IJwtService jwtService,
+            IRecaptchaService recaptchaService,
             IUserProfileService profileService,
             IEmailService emailService,
             ILogger<AuthController> logger,
@@ -35,6 +37,7 @@ namespace QuizHub.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtService = jwtService;
+            _recaptchaService = recaptchaService;
             _profileService = profileService;
             _emailService = emailService;
             _logger = logger;
@@ -56,6 +59,20 @@ namespace QuizHub.Controllers
                 });
             }
 
+            var captchaPassed = await _recaptchaService.VerifyTokenAsync(
+                model.CaptchaToken,
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                expectedAction: "register");
+
+            if (!captchaPassed)
+            {
+                return BadRequest(new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Xác minh captcha thất bại. Vui lòng thử lại."
+                });
+            }
+
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser != null)
             {
@@ -72,7 +89,8 @@ namespace QuizHub.Controllers
                 Email = model.Email,
                 HoTen = model.HoTen,
                 NgayTao = DateTime.UtcNow,
-                TrangThaiKichHoat = true
+                TrangThaiKichHoat = true,
+                EmailConfirmed = false
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -89,7 +107,81 @@ namespace QuizHub.Controllers
             // Thêm role mặc định
             await _userManager.AddToRoleAsync(user, "User");
 
-            // GỬI WELCOME EMAIL (không chờ, chạy background)
+            var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var frontendBaseUrl = _configuration["Frontend:BaseUrl"];
+            if (string.IsNullOrWhiteSpace(frontendBaseUrl))
+            {
+                frontendBaseUrl = _configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()?.FirstOrDefault()
+                    ?? "http://localhost:5173";
+            }
+
+            var confirmationLink =
+                $"{frontendBaseUrl.TrimEnd('/')}/confirm-email?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(confirmationToken)}";
+
+            var emailSent = await _emailService.SendEmailConfirmationAsync(
+                user.Email!,
+                user.HoTen ?? "User",
+                confirmationLink);
+
+            if (!emailSent)
+            {
+                await _userManager.DeleteAsync(user);
+                return StatusCode(StatusCodes.Status500InternalServerError, new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Không thể gửi email xác nhận. Vui lòng thử lại sau."
+                });
+            }
+
+            return Ok(new AuthResponseDto
+            {
+                Success = true,
+                Message = "Đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập."
+            });
+        }
+
+        [HttpGet("confirm-email")]
+        [AllowAnonymous]
+        public async Task<ActionResult<AuthResponseDto>> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+            {
+                return BadRequest(new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Link xác nhận không hợp lệ."
+                });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return BadRequest(new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Tài khoản không tồn tại hoặc đã bị xóa."
+                });
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return Ok(new AuthResponseDto
+                {
+                    Success = true,
+                    Message = "Email đã được xác nhận trước đó. Bạn có thể đăng nhập."
+                });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Xác nhận email thất bại hoặc link đã hết hạn."
+                });
+            }
+
             _ = Task.Run(async () =>
             {
                 try
@@ -102,24 +194,10 @@ namespace QuizHub.Controllers
                 }
             });
 
-            var token = await _jwtService.GenerateJwtToken(user);
-            var roles = await _userManager.GetRolesAsync(user);
-
             return Ok(new AuthResponseDto
             {
                 Success = true,
-                Message = "Đăng ký thành công",
-                Token = token,
-                Expiration = DateTime.UtcNow.AddHours(1),
-                User = new UserInfoDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    HoTen = user.HoTen ?? "",
-                    AnhDaiDien = user.AnhDaiDien,
-                    SoDienThoai = user.PhoneNumber,
-                    Roles = roles.ToList()
-                }
+                Message = "Xác nhận email thành công. Bạn có thể đăng nhập ngay bây giờ."
             });
         }
 
@@ -135,6 +213,20 @@ namespace QuizHub.Controllers
                 {
                     Success = false,
                     Message = "Dữ liệu không hợp lệ"
+                });
+            }
+
+            var captchaPassed = await _recaptchaService.VerifyTokenAsync(
+                model.CaptchaToken,
+                HttpContext.Connection.RemoteIpAddress?.ToString(),
+                expectedAction: "login");
+
+            if (!captchaPassed)
+            {
+                return Unauthorized(new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Xác minh captcha thất bại. Vui lòng thử lại."
                 });
             }
 
@@ -155,6 +247,15 @@ namespace QuizHub.Controllers
                 {
                     Success = false,
                     Message = "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên."
+                });
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                return Unauthorized(new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Tài khoản chưa xác nhận email. Vui lòng kiểm tra hộp thư và xác nhận trước khi đăng nhập."
                 });
             }
 

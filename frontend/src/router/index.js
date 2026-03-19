@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 const Home = () => import('@/views/Home.vue')
 const Login = () => import('@/views/auth/Login.vue')
 const Register = () => import('@/views/auth/Register.vue')
+const ConfirmEmail = () => import('@/views/auth/ConfirmEmail.vue')
 const ForgotPassword = () => import('@/views/auth/ForgotPassword.vue')
 const ResetPassword = () => import('@/views/auth/ResetPassword.vue')
 const GoogleCallback = () => import('@/views/auth/GoogleCallback.vue')
@@ -58,6 +59,12 @@ const routes = [
     name: 'register',
     component: Register,
     meta: { title: 'Đăng ký', guest: true }
+  },
+  {
+    path: '/confirm-email',
+    name: 'confirm-email',
+    component: ConfirmEmail,
+    meta: { title: 'Xác nhận email', guest: true }
   },
   {
     path: '/forgot-password',

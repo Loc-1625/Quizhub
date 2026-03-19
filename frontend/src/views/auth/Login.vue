@@ -78,6 +78,13 @@
             </router-link>
           </div>
 
+          <div v-if="recaptchaEnabled && useRecaptchaV2">
+            <RecaptchaV2
+              ref="recaptchaRef"
+              v-model="captchaToken"
+            />
+          </div>
+
           <button
             type="submit"
             :disabled="loading"
@@ -133,6 +140,8 @@ import {
   ArrowPathIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
+import RecaptchaV2 from '@/components/auth/RecaptchaV2.vue'
+import { isRecaptchaEnabled, isRecaptchaV2, executeRecaptchaV3 } from '@/services/recaptcha'
 
 
 const router = useRouter()
@@ -142,6 +151,10 @@ const toast = useToast()
 
 const loading = ref(false)
 const showPassword = ref(false)
+const recaptchaRef = ref(null)
+const captchaToken = ref('')
+const recaptchaEnabled = isRecaptchaEnabled()
+const useRecaptchaV2 = isRecaptchaV2()
 
 const form = reactive({
   email: '',
@@ -165,6 +178,43 @@ onMounted(() => {
       name: 'login',
       query: restQuery
     })
+  }
+
+  if (route.query.idleExpired === '1') {
+    toast.warning('Bạn đã bị đăng xuất do không hoạt động trong thời gian dài.')
+
+    const restQuery = { ...route.query }
+    delete restQuery.idleExpired
+    router.replace({
+      name: 'login',
+      query: restQuery
+    })
+  }
+
+  if (route.query.emailConfirmed === '1') {
+    toast.success('Xác nhận email thành công. Bạn có thể đăng nhập ngay bây giờ.')
+
+    const restQuery = { ...route.query }
+    delete restQuery.emailConfirmed
+    router.replace({
+      name: 'login',
+      query: restQuery
+    })
+  }
+
+  if (route.query.emailConfirmationPending === '1') {
+    toast.info('Tài khoản đã tạo. Vui lòng mở email để xác nhận trước khi đăng nhập.')
+
+    const restQuery = { ...route.query }
+    delete restQuery.emailConfirmationPending
+    router.replace({
+      name: 'login',
+      query: restQuery
+    })
+  }
+
+  if (typeof route.query.email === 'string' && route.query.email) {
+    form.email = route.query.email
   }
 
   const savedCredentials = localStorage.getItem('quizhub_saved_credentials')
@@ -205,7 +255,33 @@ const handleLogin = async () => {
   if (!validateForm()) return
 
   loading.value = true
-  const success = await authStore.login(form.email, form.password)
+
+  let recaptchaToken = null
+  try {
+    if (recaptchaEnabled) {
+      if (useRecaptchaV2) {
+        if (!captchaToken.value) {
+          loading.value = false
+          toast.warning('Vui lòng xác nhận reCAPTCHA trước khi đăng nhập.')
+          return
+        }
+        recaptchaToken = captchaToken.value
+      } else {
+        recaptchaToken = await executeRecaptchaV3('login')
+      }
+    }
+  } catch (error) {
+    loading.value = false
+    toast.error('Không thể xác minh reCAPTCHA. Vui lòng thử lại.')
+    return
+  }
+
+  const success = await authStore.login(form.email, form.password, recaptchaToken)
+
+  if (!success && recaptchaEnabled && useRecaptchaV2) {
+    recaptchaRef.value?.reset()
+  }
+
   loading.value = false
 
   if (success) {

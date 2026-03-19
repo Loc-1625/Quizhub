@@ -19,5 +19,7 @@ namespace QuizHub.Models.DTOs.Auth
         [Required(ErrorMessage = "Họ tên là bắt buộc")]
         [MaxLength(200)]
         public string HoTen { get; set; } = string.Empty;
+
+        public string? CaptchaToken { get; set; }
     }
 }

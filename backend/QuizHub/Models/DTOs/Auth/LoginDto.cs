@@ -10,5 +10,7 @@ namespace QuizHub.Models.DTOs.Auth
 
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
         public string Password { get; set; } = string.Empty;
+
+        public string? CaptchaToken { get; set; }
     }
 }
